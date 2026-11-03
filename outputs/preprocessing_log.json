@@ -1,0 +1,425 @@
+{
+  "raw_audit": {
+    "shape": {
+      "rows": 43778,
+      "columns": 7
+    },
+    "columns": [
+      "Animal",
+      "Age",
+      "Temperature",
+      "Symptom 1",
+      "Symptom 2",
+      "Symptom 3",
+      "Disease"
+    ],
+    "dtypes": {
+      "Animal": "str",
+      "Age": "int64",
+      "Temperature": "float64",
+      "Symptom 1": "str",
+      "Symptom 2": "str",
+      "Symptom 3": "str",
+      "Disease": "str"
+    },
+    "sample": [
+      {
+        "Animal": "cow",
+        "Age": 3,
+        "Temperature": 103.1,
+        "Symptom 1": "depression",
+        "Symptom 2": "painless lumps",
+        "Symptom 3": "loss of appetite",
+        "Disease": "pneumonia"
+      },
+      {
+        "Animal": "buffalo",
+        "Age": 13,
+        "Temperature": 104.5,
+        "Symptom 1": "painless lumps",
+        "Symptom 2": "loss of appetite",
+        "Symptom 3": "depression",
+        "Disease": "lumpy virus"
+      },
+      {
+        "Animal": "sheep",
+        "Age": 1,
+        "Temperature": 100.5,
+        "Symptom 1": "depression",
+        "Symptom 2": "painless lumps",
+        "Symptom 3": "loss of appetite",
+        "Disease": "lumpy virus"
+      },
+      {
+        "Animal": "cow",
+        "Age": 14,
+        "Temperature": 100.3,
+        "Symptom 1": "loss of appetite",
+        "Symptom 2": "swelling in limb",
+        "Symptom 3": "crackling sound",
+        "Disease": "blackleg"
+      },
+      {
+        "Animal": "sheep",
+        "Age": 2,
+        "Temperature": 103.6,
+        "Symptom 1": "painless lumps",
+        "Symptom 2": "loss of appetite",
+        "Symptom 3": "depression",
+        "Disease": "pneumonia"
+      },
+      {
+        "Animal": "goat",
+        "Age": 10,
+        "Temperature": 101.2,
+        "Symptom 1": "loss of appetite",
+        "Symptom 2": "blisters on gums",
+        "Symptom 3": "difficulty walking",
+        "Disease": "foot and mouth"
+      },
+      {
+        "Animal": "sheep",
+        "Age": 6,
+        "Temperature": 103.3,
+        "Symptom 1": "loss of appetite",
+        "Symptom 2": "depression",
+        "Symptom 3": "painless lumps",
+        "Disease": "lumpy virus"
+      },
+      {
+        "Animal": "goat",
+        "Age": 6,
+        "Temperature": 101.7,
+        "Symptom 1": "difficulty walking",
+        "Symptom 2": "blisters on tongue",
+        "Symptom 3": "loss of appetite",
+        "Disease": "foot and mouth"
+      }
+    ],
+    "numeric_stats": {
+      "Age": {
+        "count": 43778,
+        "mean": 6.769,
+        "std": 3.887,
+        "min": 1.0,
+        "q25": 4.0,
+        "median": 7.0,
+        "q75": 10.0,
+        "max": 15.0,
+        "skew": 0.336,
+        "kurtosis": -0.794
+      },
+      "Temperature": {
+        "count": 43778,
+        "mean": 102.27,
+        "std": 1.401,
+        "min": 100.0,
+        "q25": 101.1,
+        "median": 102.2,
+        "q75": 103.4,
+        "max": 105.0,
+        "skew": 0.219,
+        "kurtosis": -1.055
+      }
+    },
+    "animal_distribution": {
+      "counts": {
+        "cow": 11254,
+        "buffalo": 11238,
+        "sheep": 10658,
+        "goat": 10628
+      },
+      "percentages": {
+        "cow": 25.71,
+        "buffalo": 25.67,
+        "sheep": 24.35,
+        "goat": 24.28
+      }
+    },
+    "disease_distribution": {
+      "counts": {
+        "anthrax": 9842,
+        "blackleg": 9713,
+        "foot and mouth": 9701,
+        "pneumonia": 7330,
+        "lumpy virus": 7192
+      },
+      "percentages": {
+        "anthrax": 22.48,
+        "blackleg": 22.19,
+        "foot and mouth": 22.16,
+        "pneumonia": 16.74,
+        "lumpy virus": 16.43
+      }
+    },
+    "all_symptoms": [
+      "blisters on gums",
+      "blisters on hooves",
+      "blisters on mouth",
+      "blisters on tongue",
+      "chest discomfort",
+      "chills",
+      "crackling sound",
+      "depression",
+      "difficulty walking",
+      "fatigue",
+      "lameness",
+      "loss of appetite",
+      "painless lumps",
+      "shortness of breath",
+      "sores on gums",
+      "sores on hooves",
+      "sores on mouth",
+      "sores on tongue",
+      "sweats",
+      "swelling in abdomen",
+      "swelling in extremities",
+      "swelling in limb",
+      "swelling in muscle",
+      "swelling in neck"
+    ],
+    "symptom_frequencies": {
+      "blisters on gums": {
+        "count": 1176,
+        "pct": 2.69
+      },
+      "blisters on hooves": {
+        "count": 1227,
+        "pct": 2.8
+      },
+      "blisters on mouth": {
+        "count": 1170,
+        "pct": 2.67
+      },
+      "blisters on tongue": {
+        "count": 1191,
+        "pct": 2.72
+      },
+      "chest discomfort": {
+        "count": 4924,
+        "pct": 11.25
+      },
+      "chills": {
+        "count": 4846,
+        "pct": 11.07
+      },
+      "crackling sound": {
+        "count": 5886,
+        "pct": 13.45
+      },
+      "depression": {
+        "count": 20334,
+        "pct": 46.45
+      },
+      "difficulty walking": {
+        "count": 7805,
+        "pct": 17.83
+      },
+      "fatigue": {
+        "count": 4982,
+        "pct": 11.38
+      },
+      "lameness": {
+        "count": 7678,
+        "pct": 17.54
+      },
+      "loss of appetite": {
+        "count": 30098,
+        "pct": 68.75
+      },
+      "painless lumps": {
+        "count": 14522,
+        "pct": 33.17
+      },
+      "shortness of breath": {
+        "count": 4977,
+        "pct": 11.37
+      },
+      "sores on gums": {
+        "count": 1252,
+        "pct": 2.86
+      },
+      "sores on hooves": {
+        "count": 1206,
+        "pct": 2.75
+      },
+      "sores on mouth": {
+        "count": 1221,
+        "pct": 2.79
+      },
+      "sores on tongue": {
+        "count": 1258,
+        "pct": 2.87
+      },
+      "sweats": {
+        "count": 4926,
+        "pct": 11.25
+      },
+      "swelling in abdomen": {
+        "count": 1680,
+        "pct": 3.84
+      },
+      "swelling in extremities": {
+        "count": 1624,
+        "pct": 3.71
+      },
+      "swelling in limb": {
+        "count": 2799,
+        "pct": 6.39
+      },
+      "swelling in muscle": {
+        "count": 2985,
+        "pct": 6.82
+      },
+      "swelling in neck": {
+        "count": 1567,
+        "pct": 3.58
+      }
+    },
+    "missing_values_before": {
+      "Animal": 0,
+      "Age": 0,
+      "Temperature": 0,
+      "Symptom 1": 0,
+      "Symptom 2": 0,
+      "Symptom 3": 0,
+      "Disease": 0
+    },
+    "exact_duplicates": 0,
+    "feature_duplicates": 3618,
+    "outlier_audit": {
+      "Age": {
+        "q25": 4.0,
+        "q75": 10.0,
+        "iqr": 6.0,
+        "lower_bound": -5.0,
+        "upper_bound": 19.0,
+        "outlier_count": 0,
+        "outlier_pct": 0.0,
+        "decision": "Retain all values. Range is within biologically verified limits for livestock."
+      },
+      "Temperature": {
+        "q25": 101.1,
+        "q75": 103.4,
+        "iqr": 2.3,
+        "lower_bound": 97.65,
+        "upper_bound": 106.85,
+        "outlier_count": 0,
+        "outlier_pct": 0.0,
+        "decision": "Retain all values. Range is within biologically verified limits for livestock."
+      }
+    }
+  },
+  "variable_relevance": [
+    {
+      "variable": "Animal",
+      "type": "Categorical Nominal (4 levels: cow, buffalo, goat, sheep)",
+      "decision": "KEEP (Encoded)",
+      "preprocessing": "One-Hot Encoding (4 binary features)",
+      "justification": "Species physiology affects clinical susceptibility and baseline temperature/size. Retained as categorical feature vector."
+    },
+    {
+      "variable": "Age",
+      "type": "Continuous Numeric (1 to 15 years)",
+      "decision": "KEEP (Scaled)",
+      "preprocessing": "StandardScaler (Z-score standardization: mean=0, std=1)",
+      "justification": "Animal age is a key epidemiological risk factor (neonates/young vs geriatric vulnerability). Standardized to match unit variance."
+    },
+    {
+      "variable": "Temperature",
+      "type": "Continuous Numeric (100.0 to 105.0 deg F)",
+      "decision": "KEEP (Scaled)",
+      "preprocessing": "StandardScaler (Z-score standardization: mean=0, std=1)",
+      "justification": "Core objective clinical vital sign indicating febrile state vs normal physiological range. Standardized to match unit variance."
+    },
+    {
+      "variable": "Symptom 1",
+      "type": "Categorical Nominal (Symptom slot 1)",
+      "decision": "TRANSFORM (Multi-hot)",
+      "preprocessing": "Integrated into 24-dimensional binary multi-hot feature space",
+      "justification": "Positional symptom slots are arbitrary in clinical recording. Multi-hot unification eliminates slot-order bias and models symptom presence."
+    },
+    {
+      "variable": "Symptom 2",
+      "type": "Categorical Nominal (Symptom slot 2)",
+      "decision": "TRANSFORM (Multi-hot)",
+      "preprocessing": "Integrated into 24-dimensional binary multi-hot feature space",
+      "justification": "Merged with Symptoms 1 and 3 into unified clinical symptom indicators."
+    },
+    {
+      "variable": "Symptom 3",
+      "type": "Categorical Nominal (Symptom slot 3)",
+      "decision": "TRANSFORM (Multi-hot)",
+      "preprocessing": "Integrated into 24-dimensional binary multi-hot feature space",
+      "justification": "Merged with Symptoms 1 and 2 into unified clinical symptom indicators."
+    },
+    {
+      "variable": "Disease",
+      "type": "Categorical Ground-Truth Label (5 veterinary diagnoses)",
+      "decision": "ISOLATE & DROP FROM CLUSTERING",
+      "preprocessing": "Excluded from all feature engineering, scaling, and clustering",
+      "justification": "MANDATORY UNSUPERVISED INTEGRITY: Clustering must uncover latent phenotypic risk profiles strictly from observational signs. Label is preserved in an isolated vector exclusively for post-hoc descriptive cross-validation."
+    }
+  ],
+  "scaling_stats": {
+    "Age": {
+      "raw_mean": 6.769,
+      "raw_std": 3.887,
+      "raw_min": 1.0,
+      "raw_max": 15.0,
+      "scaled_mean": -0.0,
+      "scaled_std": 1.000011,
+      "scaled_min": -1.484,
+      "scaled_max": 2.118
+    },
+    "Temperature": {
+      "raw_mean": 102.27,
+      "raw_std": 1.401,
+      "raw_min": 100.0,
+      "raw_max": 105.0,
+      "scaled_mean": 0.0,
+      "scaled_std": 1.000011,
+      "scaled_min": -1.62,
+      "scaled_max": 1.949
+    }
+  },
+  "encoding_explanation": "Why Label Encoding is Invalid for Distance-Based Clustering: Label encoding assigns arbitrary integer ranks (e.g. Buffalo=0, Cow=1, Goat=2, Sheep=3). In Euclidean and Manhattan distance, (Sheep - Buffalo) = 3 - 0 = 3, while (Cow - Buffalo) = 1 - 0 = 1. This artificially imposes an untrue linear metric hierarchy where Sheep is treated as 3x farther from Buffalo than Cow is. K-Means and K-Medians treat these numbers as spatial coordinates in metric space, corrupting distance calculations. One-Hot and Multi-Hot binary encoding place each category on an orthogonal basis vector with equal pairwise distances, maintaining objective metric neutrality.",
+  "decision_log": [
+    {
+      "step": "1. Dataset Inspection & Integrity Verification",
+      "what_was_done": "Audited 43,778 records across 7 columns for missingness, data types, and value validity.",
+      "reason": "Ensure data integrity before applying unsupervised distance-based algorithms.",
+      "impact": "Confirmed zero missing values, valid physiological ranges (Age: 1-15 yr, Temp: 100-105 F)."
+    },
+    {
+      "step": "2. Disease Label Isolation",
+      "what_was_done": "Extracted 'Disease' column into an isolated ground-truth vector and removed from clustering input.",
+      "reason": "Unsupervised pattern discovery requirement: clustering must not be contaminated by diagnostic labels.",
+      "impact": "Guarantees zero target leakage. All downstream clusters represent genuine unsupervised phenotype groupings."
+    },
+    {
+      "step": "3. Categorical Encoding (Animal Species)",
+      "what_was_done": "Converted 'Animal' into 4 binary one-hot indicators (animal_buffalo, animal_cow, animal_goat, animal_sheep).",
+      "reason": "Label encoding (0,1,2,3) assigns artificial Euclidean distances between nominal species. One-hot encoding creates orthogonal dimensions with equal pairwise distance.",
+      "impact": "Preserved equal metric distance between all livestock species."
+    },
+    {
+      "step": "4. Multi-Hot Symptom Reshaping",
+      "what_was_done": "Aggregated 3 positional symptom columns into a 24-dimensional binary presence/absence indicator matrix.",
+      "reason": "Symptom recording order (Symptom 1 vs 2 vs 3) is arbitrary. Separate one-hot encoding would produce 72 sparse variables and treat same symptom in different positions as distinct features.",
+      "impact": "Eliminated positional bias, reduced feature dimensionality from 72 to 24, and created true clinical Hamming/Manhattan distance space."
+    },
+    {
+      "step": "5. Numerical Feature Standardization",
+      "what_was_done": "Applied StandardScaler (Z-score normalization) to Age and Temperature. Kept binary flags in {0, 1}.",
+      "reason": "Unscaled Age (1-15) and Temperature (100-105) have vastly different ranges and would dominate Euclidean distance over binary symptom indicators. Binary features are left in {0,1} to maintain exact Hamming distance semantics.",
+      "impact": "Normalized numeric variance (mean=0, std=1) balanced against binary symptom indicators."
+    },
+    {
+      "step": "6. Duplicate & Outlier Audit",
+      "what_was_done": "Audited exact duplicates (0) and feature duplicates (3,618). Retained feature duplicates after verifying clinical validity.",
+      "reason": "In agricultural herd medicine, multiple animals naturally present identical symptom triplets. Dropping duplicates would distort cluster density and true epidemiological prevalence.",
+      "impact": "Full observational sample (N=43,778) retained without artificial population skew."
+    }
+  ]
+}

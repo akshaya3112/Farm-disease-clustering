@@ -1,0 +1,248 @@
+{% extends "base.html" %}
+
+{% block title %}Stability, Limitations & Responsible Use{% endblock %}
+
+{% block content %}
+<div class="page-header">
+  <div style="display: flex; gap: 0.5rem; align-items: center; margin-bottom: 0.5rem;">
+    <span class="badge badge-success">&#10003; Objective 3 Evidence</span>
+    <span class="badge badge-primary">Model Robustness &amp; Ethics</span>
+  </div>
+  <h1 class="page-title">Stability, Limitations &amp; Responsible Use</h1>
+  <p class="page-subtitle">
+    Quantitative evaluation of algorithmic stability across random seeds, bootstrap resamples, and distance metrics, 
+    coupled with critical documentation of dataset biases, methodological boundaries, and veterinary ethical guidelines.
+  </p>
+</div>
+
+<!-- 1. Stability Overview KPIs -->
+<div class="grid-4" style="margin-bottom: 2rem;">
+  <div class="kpi-card">
+    <span class="kpi-label">Mean Seed ARI</span>
+    <span class="kpi-value highlight-best" style="display: inline-block;">
+      {% if stability_data %}{{ stability_data.seed_stability.mean_ari }}{% else %}0.9957{% endif %}
+    </span>
+    <p class="kpi-subtext">Across 5 random seeds (42, 123, 456, 789, 999)</p>
+  </div>
+
+  <div class="kpi-card">
+    <span class="kpi-label">Bootstrap Overlap ARI</span>
+    <span class="kpi-value highlight-best" style="display: inline-block;">
+      {% if stability_data %}{{ stability_data.bootstrap_stability.mean_overlap_ari }}{% else %}0.9765{% endif %}
+    </span>
+    <p class="kpi-subtext">5 subsamples (80% sampling with replacement)</p>
+  </div>
+
+  <div class="kpi-card">
+    <span class="kpi-label">Metric Concordance (k=4)</span>
+    <span class="kpi-value">
+      {% if stability_data and stability_data.distance_stability %}
+        {{ stability_data.distance_stability[2].ari_euclidean_vs_manhattan }}
+      {% else %}
+        0.1775
+      {% endif %}
+    </span>
+    <p class="kpi-subtext">ARI between Euclidean &amp; Manhattan solutions</p>
+  </div>
+
+  <div class="kpi-card">
+    <span class="kpi-label">Resolution ARI (k=4 vs 5)</span>
+    <span class="kpi-value">
+      {% if stability_data and stability_data.resolution_stability %}
+        {{ stability_data.resolution_stability[2].ari }}
+      {% else %}
+        0.6399
+      {% endif %}
+    </span>
+    <p class="kpi-subtext">Partition consistency across neighboring k</p>
+  </div>
+</div>
+
+<!-- 2. Stability Verdict Card -->
+<div class="card" style="border-left: 5px solid var(--success); background: var(--bg-surface-alt); margin-bottom: 2.5rem;">
+  <div class="card-title">
+    <h3 style="margin-bottom: 0;">Synthesis: Algorithmic Stability Verdict</h3>
+    <span class="badge badge-success">High Robustness</span>
+  </div>
+  <p style="font-size: 0.95rem; line-height: 1.6; margin-bottom: 0;">
+    {% if stability_data %}
+      {{ stability_data.verdict }}
+    {% endif %}
+  </p>
+</div>
+
+<!-- 3. Seed & Metric Stability Matrices -->
+<div class="grid-2" style="margin-bottom: 2.5rem;">
+  <!-- Seed Stability Matrix -->
+  <div class="card">
+    <div class="card-title">
+      <h3>Random Seed Stability Matrix (5&times;5 ARI)</h3>
+      <span class="badge badge-primary">Initialization Robustness</span>
+    </div>
+    <p style="font-size: 0.85rem;">
+      Adjusted Rand Index between independent fits under 5 random seeds (Mean ARI = 
+      <strong>{% if stability_data %}{{ stability_data.seed_stability.mean_ari }}{% else %}0.9957{% endif %}</strong>):
+    </p>
+
+    <div class="table-responsive">
+      <table class="data-table">
+        <thead>
+          <tr>
+            <th>Seed</th>
+            {% if stability_data and stability_data.seed_stability %}
+              {% for s in stability_data.seed_stability.seeds %}
+              <th>Seed {{ s }}</th>
+              {% endfor %}
+            {% endif %}
+          </tr>
+        </thead>
+        <tbody>
+          {% if stability_data and stability_data.seed_stability %}
+            {% for s1, row in zip(stability_data.seed_stability.seeds, stability_data.seed_stability.ari_matrix) %}
+            <tr>
+              <td><strong>Seed {{ s1 }}</strong></td>
+              {% for val in row %}
+              <td>
+                {% if val >= 0.99 %}
+                  <span class="highlight-best">{{ val }}</span>
+                {% else %}
+                  {{ val }}
+                {% endif %}
+              </td>
+              {% endfor %}
+            </tr>
+            {% endfor %}
+          {% endif %}
+        </tbody>
+      </table>
+    </div>
+
+    <div class="figure-container">
+      <img src="{{ url_for('serve_figure', filename='seed_stability_heatmap.png') }}" 
+           alt="Heatmap of pairwise Adjusted Rand Index across 5 random seeds" 
+           class="figure-img">
+      <p class="figure-caption">Figure 4.1: Seed ARI Heatmap (Demonstrating Convergence)</p>
+    </div>
+  </div>
+
+  <!-- Distance Metric & Resolution Stability -->
+  <div class="card">
+    <div class="card-title">
+      <h3>Distance Metric &amp; Resolution Stability</h3>
+      <span class="badge badge-info">Geometric Geometry Audit</span>
+    </div>
+    <p style="font-size: 0.85rem;">
+      Adjusted Rand Index comparing Euclidean K-Means to Manhattan K-Medians across candidate k:
+    </p>
+
+    <div class="table-responsive" style="margin-bottom: 1.5rem;">
+      <table class="data-table">
+        <thead>
+          <tr>
+            <th>Cluster Count (k)</th>
+            <th>Euclidean vs Manhattan ARI</th>
+            <th>Geometric Interpretation</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% if stability_data and stability_data.distance_stability %}
+            {% for d in stability_data.distance_stability %}
+            <tr {% if d.k == 4 %}style="background: var(--primary-bg); font-weight: 600;"{% endif %}>
+              <td><strong>k = {{ d.k }}</strong></td>
+              <td><strong>{{ d.ari_euclidean_vs_manhattan }}</strong></td>
+              <td style="font-size: 0.825rem;">
+                {% if d.k == 4 %}
+                  Moderate concordance (0.1775); Manhattan prioritizes Hamming distance on symptoms.
+                {% elif d.k <= 3 %}
+                  Low concordance; distance geometries bifurcate different axes at coarse k.
+                {% else %}
+                  Persistent metric variation across higher cluster resolutions.
+                {% endif %}
+              </td>
+            </tr>
+            {% endfor %}
+          {% endif %}
+        </tbody>
+      </table>
+    </div>
+
+    <h4>Resolution Stability (k vs k+1)</h4>
+    <div class="table-responsive">
+      <table class="data-table">
+        <thead>
+          <tr>
+            <th>Comparison</th>
+            <th>Adjusted Rand Index</th>
+            <th>Sub-cluster Nestedness</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% if stability_data and stability_data.resolution_stability %}
+            {% for r in stability_data.resolution_stability %}
+            <tr>
+              <td><strong>{{ r.comparison }}</strong></td>
+              <td>{{ r.ari }}</td>
+              <td style="font-size: 0.825rem;">
+                {% if r.ari >= 0.60 %}
+                  <span class="badge badge-success">High Nestedness</span>
+                {% else %}
+                  <span class="badge badge-warning">Moderate Reorganization</span>
+                {% endif %}
+              </td>
+            </tr>
+            {% endfor %}
+          {% endif %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<!-- 4. Dataset Biases & Methodological Limitations -->
+<h2 style="margin-bottom: 1rem;">Documented Limitations &amp; Potential Biases</h2>
+<div class="grid-2" style="margin-bottom: 2.5rem;">
+  {% if stability_data and stability_data.limitations %}
+    {% for item in stability_data.limitations %}
+    <div class="card" style="border-left: 4px solid var(--warning);">
+      <h3 style="font-size: 1.1rem; color: var(--text-primary); margin-bottom: 0.5rem;">
+        {{ loop.index }}. {{ item.category }}
+      </h3>
+      <p style="font-size: 0.9rem; color: var(--text-secondary); line-height: 1.6; margin-bottom: 0;">
+        {{ item.description }}
+      </p>
+    </div>
+    {% endfor %}
+  {% endif %}
+</div>
+
+<!-- 5. Responsible Use & Veterinary Clinical Ethics -->
+<h2 style="margin-bottom: 1rem;">Responsible Use &amp; Clinical Decision Boundaries</h2>
+<div class="grid-2" style="margin-bottom: 2.5rem;">
+  {% if stability_data and stability_data.responsible_use %}
+    {% for rule in stability_data.responsible_use %}
+    <div class="card" style="border-left: 4px solid var(--info);">
+      <div style="display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.5rem;">
+        <span class="badge badge-info">Principle {{ loop.index }}</span>
+        <h3 style="font-size: 1.05rem; margin-bottom: 0;">{{ rule.principle }}</h3>
+      </div>
+      <p style="font-size: 0.9rem; color: var(--text-secondary); line-height: 1.6; margin-bottom: 0;">
+        {{ rule.guideline }}
+      </p>
+    </div>
+    {% endfor %}
+  {% endif %}
+</div>
+
+<!-- Cautious Naming Disclaimer Banner -->
+<div class="alert alert-info">
+  <span style="font-size: 1.5rem;">💡</span>
+  <div style="font-size: 0.9rem;">
+    <strong>Epistemological Note on Cluster Naming:</strong><br>
+    The cluster labels in this system (e.g. <em>"Profile 1: Geriatric Bovine Clinical Syndrome"</em>) 
+    are descriptive, cautious placeholders derived strictly from observational symptom frequencies and vital statistics. 
+    They do NOT constitute real-world pathological disease entities, and should never be reified into diagnostic dogma.
+  </div>
+</div>
+
+{% endblock %}
+

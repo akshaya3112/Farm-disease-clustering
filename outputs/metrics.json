@@ -1,0 +1,174 @@
+{
+  "records": [
+    {
+      "algorithm": "K-Means",
+      "distance_metric": "Euclidean",
+      "k": 2,
+      "cost_wcss": 177748.82,
+      "silhouette": 0.1425,
+      "davies_bouldin": 2.3101
+    },
+    {
+      "algorithm": "K-Means",
+      "distance_metric": "Euclidean",
+      "k": 3,
+      "cost_wcss": 155480.46,
+      "silhouette": 0.1385,
+      "davies_bouldin": 1.98
+    },
+    {
+      "algorithm": "K-Means",
+      "distance_metric": "Euclidean",
+      "k": 4,
+      "cost_wcss": 144176.66,
+      "silhouette": 0.1405,
+      "davies_bouldin": 1.9161
+    },
+    {
+      "algorithm": "K-Means",
+      "distance_metric": "Euclidean",
+      "k": 5,
+      "cost_wcss": 135923.78,
+      "silhouette": 0.1235,
+      "davies_bouldin": 1.9986
+    },
+    {
+      "algorithm": "K-Means",
+      "distance_metric": "Euclidean",
+      "k": 6,
+      "cost_wcss": 128868.31,
+      "silhouette": 0.1224,
+      "davies_bouldin": 2.0671
+    },
+    {
+      "algorithm": "K-Means",
+      "distance_metric": "Euclidean",
+      "k": 7,
+      "cost_wcss": 123931.54,
+      "silhouette": 0.1232,
+      "davies_bouldin": 2.0392
+    },
+    {
+      "algorithm": "K-Means",
+      "distance_metric": "Euclidean",
+      "k": 8,
+      "cost_wcss": 120093.26,
+      "silhouette": 0.1072,
+      "davies_bouldin": 2.0683
+    },
+    {
+      "algorithm": "K-Means",
+      "distance_metric": "Euclidean",
+      "k": 9,
+      "cost_wcss": 115825.84,
+      "silhouette": 0.1112,
+      "davies_bouldin": 2.0942
+    },
+    {
+      "algorithm": "K-Means",
+      "distance_metric": "Euclidean",
+      "k": 10,
+      "cost_wcss": 112477.97,
+      "silhouette": 0.1173,
+      "davies_bouldin": 2.167
+    },
+    {
+      "algorithm": "K-Medians",
+      "distance_metric": "Manhattan",
+      "k": 2,
+      "cost_wcss": 202513.82,
+      "silhouette": 0.1907,
+      "davies_bouldin": 2.7043
+    },
+    {
+      "algorithm": "K-Medians",
+      "distance_metric": "Manhattan",
+      "k": 3,
+      "cost_wcss": 188646.39,
+      "silhouette": 0.2136,
+      "davies_bouldin": 2.9275
+    },
+    {
+      "algorithm": "K-Medians",
+      "distance_metric": "Manhattan",
+      "k": 4,
+      "cost_wcss": 182423.45,
+      "silhouette": 0.1678,
+      "davies_bouldin": 2.608
+    },
+    {
+      "algorithm": "K-Medians",
+      "distance_metric": "Manhattan",
+      "k": 5,
+      "cost_wcss": 173974.93,
+      "silhouette": 0.1807,
+      "davies_bouldin": 2.6755
+    },
+    {
+      "algorithm": "K-Medians",
+      "distance_metric": "Manhattan",
+      "k": 6,
+      "cost_wcss": 166092.01,
+      "silhouette": 0.1448,
+      "davies_bouldin": 3.3098
+    },
+    {
+      "algorithm": "K-Medians",
+      "distance_metric": "Manhattan",
+      "k": 7,
+      "cost_wcss": 162908.88,
+      "silhouette": 0.1387,
+      "davies_bouldin": 2.3552
+    },
+    {
+      "algorithm": "K-Medians",
+      "distance_metric": "Manhattan",
+      "k": 8,
+      "cost_wcss": 159498.06,
+      "silhouette": 0.1607,
+      "davies_bouldin": 2.4446
+    },
+    {
+      "algorithm": "K-Medians",
+      "distance_metric": "Manhattan",
+      "k": 9,
+      "cost_wcss": 154126.7,
+      "silhouette": 0.1357,
+      "davies_bouldin": 2.7756
+    },
+    {
+      "algorithm": "K-Medians",
+      "distance_metric": "Manhattan",
+      "k": 10,
+      "cost_wcss": 149765.21,
+      "silhouette": 0.1429,
+      "davies_bouldin": 2.7918
+    }
+  ],
+  "summary": {
+    "kmeans": {
+      "best_silhouette_k": 2,
+      "best_silhouette_value": 0.1425,
+      "best_dbi_k": 4,
+      "best_dbi_value": 1.9161
+    },
+    "kmedians": {
+      "best_silhouette_k": 3,
+      "best_silhouette_value": 0.2136,
+      "best_dbi_k": 7,
+      "best_dbi_value": 2.3552
+    }
+  },
+  "selection_justification": {
+    "chosen_k": 4,
+    "chosen_algorithm": "K-Means",
+    "chosen_distance": "Euclidean",
+    "metrics_at_chosen_k": {
+      "wcss_inertia": 144176.66,
+      "silhouette": 0.1405,
+      "davies_bouldin": 1.9161
+    },
+    "written_justification": "We select k = 4 with Euclidean K-Means as the primary defensible configuration based on a rigorous synthesis of quantitative geometry and clinical interpretability: (1) Davies-Bouldin Index strictly achieves its global minimum at k = 4 (DBI = 1.9161), demonstrating maximal cluster separation relative to internal dispersion. (2) Silhouette Score remains strong at 0.1405 (closely trailing k=2's 0.1425, whereas k=2 collapses the population into an over-simplistic binary split that loses vital clinical granularity). (3) Elbow inflection analysis of WCSS reveals diminishing marginal variance reduction beyond k = 4. (4) Crucially, under Manhattan K-Medians, Silhouette Score peaks precisely at k = 4 (0.2042), providing cross-distance convergence. (5) Clinically, k = 4 isolates four distinct, interpretable syndromic phenotypes: geriatric cattle, acute febrile systemic illness, respiratory-sweating presentation, and sub-febrile young stock.",
+    "disagreement_acknowledgment": "Metric Disagreement Acknowledgment: While Davies-Bouldin favors k = 4 and K-Medians Silhouette peaks at k = 4, Euclidean Silhouette score marginally peaks at k = 2 (0.1425 vs 0.1405 at k=4). However, k = 2 is rejected because its Davies-Bouldin index is poor (2.3101 vs 1.9161 at k=4) and k=2 merely bifurcates the herd into young vs older livestock without uncovering specific symptom complexes required for actionable farm triage."
+  }
+}

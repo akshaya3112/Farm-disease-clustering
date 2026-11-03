@@ -1,0 +1,167 @@
+{
+  "seed_stability": {
+    "seeds": [
+      42,
+      123,
+      456,
+      789,
+      999
+    ],
+    "ari_matrix": [
+      [
+        1.0,
+        0.9987,
+        0.9988,
+        0.9914,
+        0.9992
+      ],
+      [
+        0.9987,
+        1.0,
+        0.9975,
+        0.9903,
+        0.9994
+      ],
+      [
+        0.9988,
+        0.9975,
+        1.0,
+        0.9923,
+        0.9981
+      ],
+      [
+        0.9914,
+        0.9903,
+        0.9923,
+        1.0,
+        0.9907
+      ],
+      [
+        0.9992,
+        0.9994,
+        0.9981,
+        0.9907,
+        1.0
+      ]
+    ],
+    "mean_ari": 0.9957,
+    "min_ari": 0.9903,
+    "max_ari": 0.9994
+  },
+  "bootstrap_stability": {
+    "n_bootstraps": 5,
+    "sample_ratio": 0.8,
+    "mean_overlap_ari": 0.9765,
+    "min_overlap_ari": 0.962,
+    "max_overlap_ari": 0.9869
+  },
+  "distance_stability": [
+    {
+      "k": 2,
+      "ari_euclidean_vs_manhattan": 0.0031
+    },
+    {
+      "k": 3,
+      "ari_euclidean_vs_manhattan": 0.0096
+    },
+    {
+      "k": 4,
+      "ari_euclidean_vs_manhattan": 0.1775
+    },
+    {
+      "k": 5,
+      "ari_euclidean_vs_manhattan": 0.1302
+    },
+    {
+      "k": 6,
+      "ari_euclidean_vs_manhattan": 0.2043
+    }
+  ],
+  "resolution_stability": [
+    {
+      "comparison": "k=2 vs k=3",
+      "k1": 2,
+      "k2": 3,
+      "ari": 0.4569
+    },
+    {
+      "comparison": "k=3 vs k=4",
+      "k1": 3,
+      "k2": 4,
+      "ari": 0.6453
+    },
+    {
+      "comparison": "k=4 vs k=5",
+      "k1": 4,
+      "k2": 5,
+      "ari": 0.6399
+    },
+    {
+      "comparison": "k=5 vs k=6",
+      "k1": 5,
+      "k2": 6,
+      "ari": 0.6643
+    },
+    {
+      "comparison": "k=6 vs k=7",
+      "k1": 6,
+      "k2": 7,
+      "ari": 0.8515
+    },
+    {
+      "comparison": "k=7 vs k=8",
+      "k1": 7,
+      "k2": 8,
+      "ari": 0.7314
+    },
+    {
+      "comparison": "k=8 vs k=9",
+      "k1": 8,
+      "k2": 9,
+      "ari": 0.707
+    },
+    {
+      "comparison": "k=9 vs k=10",
+      "k1": 9,
+      "k2": 10,
+      "ari": 0.7802
+    }
+  ],
+  "verdict": "STABILITY VERDICT: HIGH TO MODERATE STABILITY. The chosen k=4 configuration exhibits strong algorithmic convergence across random seed re-starts (mean ARI = 0.9957) and robust persistence under bootstrap re-sampling (mean ARI = 0.9765). Comparing Euclidean K-Means and Manhattan K-Medians reveals moderate concordance (ARI at k=4 is 0.1775), reflecting how Manhattan distance more strictly preserves sparse binary symptom Hamming geometry while Euclidean distance incorporates continuous variance.",
+  "limitations": [
+    {
+      "category": "Dataset Origin & Sampling Bias",
+      "description": "The dataset originated as an open Kaggle resource. While clinically plausible, sampling methods, farm geographic provenance, and data collection protocols are unknown. The fixed structure of exactly three symptom slots per animal likely reflects a collection artifact rather than unconstrained real-world veterinary documentation."
+    },
+    {
+      "category": "Algorithm-Data Metric Mismatch",
+      "description": "K-Means mathematically assumes continuous, spherical, isotropic Gaussian clusters in Euclidean space. Our feature space contains 24 binary multi-hot symptom indicators and 4 one-hot species indicators. While standardized numeric features (Age, Temperature) align with Euclidean metrics, binary symptoms are more natively aligned with Manhattan/Hamming distance (as benchmarked in our K-Medians evaluation)."
+    },
+    {
+      "category": "Local Optima & Non-Convexity",
+      "description": "Both K-Means and K-Medians optimize non-convex objective functions and can theoretically settle into local optima. While multiple restarts (n_init >= 10) and seed stability audits mitigate this risk, cluster boundaries remain dependent on initialization."
+    },
+    {
+      "category": "Limits of Unsupervised Validation",
+      "description": "Unsupervised validation metrics (Silhouette, Davies-Bouldin) evaluate geometrical compactness and separation in mathematical space, which do not inherently guarantee veterinary clinical validity. High mathematical separation does not automatically equate to biological etiology."
+    }
+  ],
+  "responsible_use": [
+    {
+      "principle": "Exploratory Phenotyping, NOT Diagnostic Classification",
+      "guideline": "Discovered clusters represent observational phenotype groupings and risk patterns. They must NEVER be treated as permanent disease categories or used as automated diagnostic surrogates."
+    },
+    {
+      "principle": "Veterinary Expert Validation Required",
+      "guideline": "Any risk profile flagged by this clustering model must be validated by a licensed veterinarian prior to clinical intervention or management changes."
+    },
+    {
+      "principle": "No Automated Treatment or Culling Decisions",
+      "guideline": "Cluster membership must never be used to automate pharmaceutical prescription, quarantine orders, or culling decisions without laboratory and pathological confirmation."
+    },
+    {
+      "principle": "Contextual Herd Monitoring",
+      "guideline": "Intended strictly for herd-level epidemiological surveillance, syndromic anomaly detection, and farm-wide triage prioritization."
+    }
+  ]
+}

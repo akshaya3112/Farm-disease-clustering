@@ -1,0 +1,365 @@
+{% extends "base.html" %}
+
+{% block title %}Data & Preprocessing - Objective 1{% endblock %}
+
+{% block content %}
+<div class="page-header">
+  <div style="display: flex; gap: 0.5rem; align-items: center; margin-bottom: 0.5rem;">
+    <span class="badge badge-success">&#10003; Objective 1 Evidence</span>
+    <span class="badge badge-primary">Data Preparation &amp; Auditing</span>
+  </div>
+  <h1 class="page-title">Objective 1: Data Preparation &amp; Preprocessing</h1>
+  <p class="page-subtitle">
+    Rigorous auditing of variable relevance, missing values, duplicates, biological outliers, categorical multi-hot restructuring, 
+    and Z-score standardization for unsupervised distance geometry.
+  </p>
+</div>
+
+<!-- 1. Dataset Overview KPI Grid -->
+<div class="grid-4" style="margin-bottom: 2rem;">
+  <div class="kpi-card">
+    <span class="kpi-label">Dataset Shape</span>
+    <span class="kpi-value">
+      {% if prep_log %}{{ "{:,}".format(prep_log.raw_audit.shape.rows) }} &times; {{ prep_log.raw_audit.shape.columns }}{% else %}43,778 &times; 7{% endif %}
+    </span>
+    <p class="kpi-subtext">43,778 animals across 7 initial columns</p>
+  </div>
+
+  <div class="kpi-card">
+    <span class="kpi-label">Missing Values</span>
+    <span class="kpi-value highlight-best" style="display: inline-block;">0 Cells (0.0%)</span>
+    <p class="kpi-subtext">Complete observations across all fields</p>
+  </div>
+
+  <div class="kpi-card">
+    <span class="kpi-label">Exact Duplicates</span>
+    <span class="kpi-value">0 Rows</span>
+    <p class="kpi-subtext">Zero duplicate rows across all 7 fields</p>
+  </div>
+
+  <div class="kpi-card">
+    <span class="kpi-label">Feature Duplicates</span>
+    <span class="kpi-value">
+      {% if prep_log %}{{ "{:,}".format(prep_log.raw_audit.feature_duplicates) }}{% else %}3,618{% endif %}
+    </span>
+    <p class="kpi-subtext">Retained: natural clinical symptom overlap</p>
+  </div>
+</div>
+
+<!-- 2. Raw Sample Table -->
+<div class="card">
+  <div class="card-title">
+    <h3>Raw Dataset Sample Records (First 8 Rows)</h3>
+    <span class="badge badge-info">Source: Kaggle Animal Disease Dataset</span>
+  </div>
+  <div class="table-responsive">
+    <table class="data-table">
+      <thead>
+        <tr>
+          <th>Animal</th>
+          <th>Age (yr)</th>
+          <th>Temperature (&deg;F)</th>
+          <th>Symptom 1</th>
+          <th>Symptom 2</th>
+          <th>Symptom 3</th>
+          <th>Disease (Ground Truth)</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% if prep_log and prep_log.raw_audit.sample %}
+          {% for r in prep_log.raw_audit.sample %}
+          <tr>
+            <td><strong>{{ r['Animal'] }}</strong></td>
+            <td>{{ r['Age'] }}</td>
+            <td>{{ r['Temperature'] }}</td>
+            <td>{{ r['Symptom 1'] }}</td>
+            <td>{{ r['Symptom 2'] }}</td>
+            <td>{{ r['Symptom 3'] }}</td>
+            <td><span class="badge badge-warning">{{ r['Disease'] }}</span></td>
+          </tr>
+          {% endfor %}
+        {% endif %}
+      </tbody>
+    </table>
+  </div>
+  <p style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 0;">
+    <em>Notice: The <code>Disease</code> label shown above was isolated prior to clustering and was NOT accessible to the feature scaler or clustering models.</em>
+  </p>
+</div>
+
+<!-- 3. Variable Relevance Review Table -->
+<div class="card">
+  <div class="card-title">
+    <h3>Variable Relevance &amp; Architectural Role</h3>
+    <span class="badge badge-primary">Methodological Justification</span>
+  </div>
+  <p>
+    Every variable in the dataset was reviewed for clinical relevance, information leakage risks, and distance geometry validity:
+  </p>
+  <div class="table-responsive">
+    <table class="data-table">
+      <thead>
+        <tr>
+          <th>Variable</th>
+          <th>Data Type</th>
+          <th>Action</th>
+          <th>Preprocessing Operation</th>
+          <th>Methodological Justification</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% if prep_log and prep_log.variable_relevance %}
+          {% for v in prep_log.variable_relevance %}
+          <tr>
+            <td><strong>{{ v.variable }}</strong></td>
+            <td><code>{{ v.type }}</code></td>
+            <td>
+              {% if "DROP" in v.decision or "ISOLATE" in v.decision %}
+                <span class="badge badge-danger">{{ v.decision }}</span>
+              {% elif "TRANSFORM" in v.decision %}
+                <span class="badge badge-info">{{ v.decision }}</span>
+              {% else %}
+                <span class="badge badge-success">{{ v.decision }}</span>
+              {% endif %}
+            </td>
+            <td>{{ v.preprocessing }}</td>
+            <td style="font-size: 0.85rem;">{{ v.justification }}</td>
+          </tr>
+          {% endfor %}
+        {% endif %}
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<!-- 4. Encoding Strategy: Why Label Encoding is Wrong -->
+<div class="card" style="border-left: 5px solid var(--info);">
+  <div class="card-title">
+    <h3>Why Label Encoding is Flawed for Distance-Based Clustering</h3>
+    <span class="badge badge-info">Geometric Foundation</span>
+  </div>
+  <div class="grid-2">
+    <div>
+      <h4 style="color: var(--danger);">The Label Encoding Trap</h4>
+      <p style="font-size: 0.9rem;">
+        Label encoding maps nominal classes to ordinal integers (e.g., <code>Buffalo=0</code>, <code>Cow=1</code>, <code>Goat=2</code>, <code>Sheep=3</code>).
+        When fed to K-Means or K-Medians, the algorithm computes Euclidean distance:
+      </p>
+      <div style="background: var(--bg-surface-alt); padding: 0.75rem 1rem; border-radius: 6px; font-family: var(--font-mono); font-size: 0.85rem; margin-bottom: 0.75rem;">
+        dist(Sheep, Buffalo) = (3 - 0)&sup2; = 9<br>
+        dist(Cow, Buffalo) = (1 - 0)&sup2; = 1
+      </div>
+      <p style="font-size: 0.9rem;">
+        This artificially forces the model to believe Sheep is <strong>3 times more dissimilar</strong> from Buffalo than Cow is, 
+        corrupting cluster boundaries with false metric topology.
+      </p>
+    </div>
+    <div>
+      <h4 style="color: var(--success);">Our Multi-Hot / One-Hot Solution</h4>
+      <p style="font-size: 0.9rem;">
+        We mapped the nominal species into orthogonal basis vectors (4 binary indicators) and restructured 
+        the three symptom slots into a unified <strong>24-dimensional binary multi-hot feature space</strong>.
+      </p>
+      <div style="background: var(--bg-surface-alt); padding: 0.75rem 1rem; border-radius: 6px; font-family: var(--font-mono); font-size: 0.85rem; margin-bottom: 0.75rem;">
+        dist_Hamming(Sheep, Buffalo) = 1.0 (equidistant)<br>
+        Multi-hot symptom vector: x &isin; {0, 1}&sup2;&#8308;
+      </div>
+      <p style="font-size: 0.9rem;">
+        This guarantees every livestock species is equidistant in space, and symptom presence is recorded neutrally 
+        regardless of whether it appeared in Symptom 1, 2, or 3.
+      </p>
+    </div>
+  </div>
+</div>
+
+<!-- 5. Missing Values & Outliers Audit -->
+<div class="grid-2">
+  <div class="card">
+    <div class="card-title">
+      <h3>Missing Values Audit</h3>
+      <span class="badge badge-success">0 Missing</span>
+    </div>
+    <p style="font-size: 0.9rem;">
+      Formal audit verified 0 missing entries across all 43,778 records.
+    </p>
+    <div class="table-responsive">
+      <table class="data-table">
+        <thead>
+          <tr>
+            <th>Column</th>
+            <th>Missing Count</th>
+            <th>Imputation Strategy</th>
+            <th>Status</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>Age</td>
+            <td>0</td>
+            <td>Median (planned fallback)</td>
+            <td><span class="badge badge-success">Clean</span></td>
+          </tr>
+          <tr>
+            <td>Temperature</td>
+            <td>0</td>
+            <td>Median (planned fallback)</td>
+            <td><span class="badge badge-success">Clean</span></td>
+          </tr>
+          <tr>
+            <td>Animal</td>
+            <td>0</td>
+            <td>Mode / "Unknown" fallback</td>
+            <td><span class="badge badge-success">Clean</span></td>
+          </tr>
+          <tr>
+            <td>Symptoms 1, 2, 3</td>
+            <td>0</td>
+            <td>Multi-hot 0-vector fallback</td>
+            <td><span class="badge badge-success">Clean</span></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">
+      <h3>Outlier Inspection (IQR Method)</h3>
+      <span class="badge badge-info">Biologically Verified</span>
+    </div>
+    <p style="font-size: 0.9rem;">
+      Statistical IQR threshold analysis for Age and Temperature:
+    </p>
+    <div class="table-responsive">
+      <table class="data-table">
+        <thead>
+          <tr>
+            <th>Feature</th>
+            <th>IQR Bounds [Q1 - 1.5&times;IQR, Q3 + 1.5&times;IQR]</th>
+            <th>Observed Range</th>
+            <th>Decision</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><strong>Age</strong></td>
+            <td>[-5.0 yr, 19.0 yr]</td>
+            <td>[1.0 yr, 15.0 yr]</td>
+            <td><span class="badge badge-success">0 Outliers (Retained)</span></td>
+          </tr>
+          <tr>
+            <td><strong>Temperature</strong></td>
+            <td>[97.65 &deg;F, 106.85 &deg;F]</td>
+            <td>[100.0 &deg;F, 105.0 &deg;F]</td>
+            <td><span class="badge badge-success">0 Outliers (Retained)</span></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="figure-container">
+      <img src="{{ url_for('serve_figure', filename='outlier_boxplots.png') }}" 
+           alt="Boxplots of Age and Temperature showing values within biological IQR limits" 
+           class="figure-img" style="max-height: 220px;">
+      <p class="figure-caption">Figure 1.1: Outlier Boxplot Inspection for Vital Features</p>
+    </div>
+  </div>
+</div>
+
+<!-- 6. Before / After Feature Standardization -->
+<div class="card">
+  <div class="card-title">
+    <h3>Numerical Standardization Distributions (Before vs After)</h3>
+    <span class="badge badge-primary">StandardScaler (&mu;=0, &sigma;=1)</span>
+  </div>
+  <p style="font-size: 0.9rem;">
+    Age (1-15 yr) and Temperature (100-105 &deg;F) were transformed with <code>StandardScaler</code> to ensure continuous features 
+    do not dwarf binary symptom indicator variances:
+  </p>
+  
+  {% if prep_log and prep_log.scaling_stats %}
+  <div class="table-responsive">
+    <table class="data-table">
+      <thead>
+        <tr>
+          <th>Feature</th>
+          <th>Raw Mean &plusmn; Std</th>
+          <th>Raw Range [Min, Max]</th>
+          <th>Standardized Mean &plusmn; Std</th>
+          <th>Standardized Range [Min, Max]</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><strong>Age</strong></td>
+          <td>{{ prep_log.scaling_stats.Age.raw_mean }} &plusmn; {{ prep_log.scaling_stats.Age.raw_std }} yr</td>
+          <td>[{{ prep_log.scaling_stats.Age.raw_min }}, {{ prep_log.scaling_stats.Age.raw_max }}] yr</td>
+          <td>{{ prep_log.scaling_stats.Age.scaled_mean }} &plusmn; {{ prep_log.scaling_stats.Age.scaled_std }}</td>
+          <td>[{{ prep_log.scaling_stats.Age.scaled_min }}, {{ prep_log.scaling_stats.Age.scaled_max }}]</td>
+        </tr>
+        <tr>
+          <td><strong>Temperature</strong></td>
+          <td>{{ prep_log.scaling_stats.Temperature.raw_mean }} &plusmn; {{ prep_log.scaling_stats.Temperature.raw_std }} &deg;F</td>
+          <td>[{{ prep_log.scaling_stats.Temperature.raw_min }}, {{ prep_log.scaling_stats.Temperature.raw_max }}] &deg;F</td>
+          <td>{{ prep_log.scaling_stats.Temperature.scaled_mean }} &plusmn; {{ prep_log.scaling_stats.Temperature.scaled_std }}</td>
+          <td>[{{ prep_log.scaling_stats.Temperature.scaled_min }}, {{ prep_log.scaling_stats.Temperature.scaled_max }}]</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+  {% endif %}
+
+  <div class="figure-container">
+    <img src="{{ url_for('serve_figure', filename='preprocessing_distributions.png') }}" 
+         alt="Histograms and KDE plots showing raw distributions and standardized distributions for Age and Temperature" 
+         class="figure-img">
+    <p class="figure-caption">Figure 1.2: Raw vs Standardized Vital Distributions (Mean=0, Std=1)</p>
+  </div>
+</div>
+
+<!-- 7. Preprocessing Decision Log Table (Searchable & Filterable) -->
+<div class="card">
+  <div class="card-title">
+    <h3>Preprocessing Decision Log</h3>
+    <span class="badge badge-success">Auditable Provenance</span>
+  </div>
+  <p style="font-size: 0.9rem;">
+    Full record of every transformation applied to the dataset with formal reasoning and impact analysis:
+  </p>
+
+  <div class="control-panel">
+    <div class="control-group" style="flex: 1;">
+      <label for="table-search-input" class="control-label">Search Decision Log:</label>
+      <input type="text" id="table-search-input" class="form-input" 
+             placeholder="Type to filter by step, reason, or impact..." 
+             data-target-table="decision-log-table" style="width: 100%; max-width: 400px;">
+    </div>
+  </div>
+
+  <div class="table-responsive">
+    <table class="data-table" id="decision-log-table">
+      <thead>
+        <tr>
+          <th style="width: 25%;">Step</th>
+          <th style="width: 30%;">What Was Done</th>
+          <th style="width: 25%;">Reason</th>
+          <th style="width: 20%;">Impact</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% if prep_log and prep_log.decision_log %}
+          {% for row in prep_log.decision_log %}
+          <tr>
+            <td><strong>{{ row.step }}</strong></td>
+            <td>{{ row.what_was_done }}</td>
+            <td style="font-size: 0.85rem; color: var(--text-secondary);">{{ row.reason }}</td>
+            <td style="font-size: 0.85rem;"><span class="badge badge-info">{{ row.impact }}</span></td>
+          </tr>
+          {% endfor %}
+        {% endif %}
+      </tbody>
+    </table>
+  </div>
+</div>
+
+{% endblock %}
+

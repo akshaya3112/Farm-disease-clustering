@@ -1,0 +1,228 @@
+{% extends "base.html" %}
+
+{% block title %}About & Reproducibility{% endblock %}
+
+{% block content %}
+<div class="page-header">
+  <div style="display: flex; gap: 0.5rem; align-items: center; margin-bottom: 0.5rem;">
+    <span class="badge badge-success">&#10003; Project Outcome</span>
+    <span class="badge badge-primary">Reproducibility &amp; Architecture</span>
+  </div>
+  <h1 class="page-title">About &amp; Reproducibility Guide</h1>
+  <p class="page-subtitle">
+    Complete architectural documentation, software dependency versions, one-command pipeline execution steps, 
+    and direct downloads for all empirical artifacts and figures.
+  </p>
+</div>
+
+<!-- 1. Project Outcome Mapping to Evidence -->
+<div class="card" style="border-left: 5px solid var(--primary); margin-bottom: 2rem;">
+  <div class="card-title">
+    <h3>Project Outcome Mapped to Evidence</h3>
+    <span class="badge badge-success">Audited Alignment</span>
+  </div>
+  <div class="table-responsive">
+    <table class="data-table">
+      <thead>
+        <tr>
+          <th>Required Outcome</th>
+          <th>Implementation Evidence in System</th>
+          <th>Verification Location</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><strong>Objective 1: Documented Preprocessing</strong></td>
+          <td>Zero missing values confirmed; multi-hot 24-symptom representation; Z-score vital scaling; audit of 3,618 feature duplicates; auditable Decision Log.</td>
+          <td><a href="{{ url_for('preprocessing') }}" class="btn btn-outline" style="padding: 0.2rem 0.6rem; font-size: 0.8rem;">/preprocessing</a></td>
+        </tr>
+        <tr>
+          <td><strong>Objective 2: Clustering Workflow</strong></td>
+          <td>Full grid evaluation across k=2..10 for Euclidean K-Means &amp; Manhattan K-Medians; WCSS/L1 cost, Silhouette, and DBI computed; PCA scree &amp; scatter; selection of k=4 with written trade-off justification.</td>
+          <td><a href="{{ url_for('clustering') }}" class="btn btn-outline" style="padding: 0.2rem 0.6rem; font-size: 0.8rem;">/clustering</a></td>
+        </tr>
+        <tr>
+          <td><strong>Objective 3: Interpretation &amp; Stability</strong></td>
+          <td>4 cautious phenotype profiles; ANOVA feature ranking; surrogate tree (fidelity 97.8%); seed ARI (0.9957) &amp; bootstrap ARI (0.9765); post-hoc disease cross-check strictly labelled as descriptive.</td>
+          <td><a href="{{ url_for('profiles') }}" class="btn btn-outline" style="padding: 0.2rem 0.6rem; font-size: 0.8rem;">/profiles</a></td>
+        </tr>
+        <tr>
+          <td><strong>Phase B Web App Integrity</strong></td>
+          <td>Zero hardcoded figures or numbers; all charts dynamically loaded from <code>outputs/</code> JSON files via REST API; light/dark theme; responsive layout; graceful missing-file fallback.</td>
+          <td><a href="{{ url_for('home') }}" class="btn btn-outline" style="padding: 0.2rem 0.6rem; font-size: 0.8rem;">All Pages</a></td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<!-- 2. Reproduction Instructions -->
+<div class="card" style="margin-bottom: 2rem;">
+  <div class="card-title">
+    <h3>How to Run the Pipeline &amp; Launch Web App</h3>
+    <span class="badge badge-info">Zero-Config Execution</span>
+  </div>
+  <p style="font-size: 0.9rem;">
+    The entire project is structured for instantaneous, single-command reproducibility.
+  </p>
+
+  <div class="grid-2">
+    <div>
+      <h4>Option A: Single Batch / Shell Command</h4>
+      <p style="font-size: 0.85rem; color: var(--text-secondary);">
+        Windows:
+      </p>
+      <pre style="background: var(--bg-surface-alt); padding: 0.75rem 1rem; border-radius: 6px; margin-bottom: 0.75rem;"><code>.\run_all.bat</code></pre>
+      
+      <p style="font-size: 0.85rem; color: var(--text-secondary);">
+        Linux / macOS / Bash:
+      </p>
+      <pre style="background: var(--bg-surface-alt); padding: 0.75rem 1rem; border-radius: 6px; margin-bottom: 0.75rem;"><code>bash run_all.sh</code></pre>
+    </div>
+
+    <div>
+      <h4>Option B: Manual Step-by-Step Execution</h4>
+      <p style="font-size: 0.85rem; color: var(--text-secondary);">
+        Step 1: Install dependencies
+      </p>
+      <pre style="background: var(--bg-surface-alt); padding: 0.75rem 1rem; border-radius: 6px; margin-bottom: 0.5rem;"><code>pip install -r requirements.txt</code></pre>
+      
+      <p style="font-size: 0.85rem; color: var(--text-secondary);">
+        Step 2: Execute data science pipeline (Phase A)
+      </p>
+      <pre style="background: var(--bg-surface-alt); padding: 0.75rem 1rem; border-radius: 6px; margin-bottom: 0.5rem;"><code>python run_pipeline.py</code></pre>
+
+      <p style="font-size: 0.85rem; color: var(--text-secondary);">
+        Step 3: Launch web dashboard (Phase B)
+      </p>
+      <pre style="background: var(--bg-surface-alt); padding: 0.75rem 1rem; border-radius: 6px; margin-bottom: 0.75rem;"><code>python app.py</code></pre>
+      <p style="font-size: 0.825rem; color: var(--text-muted); margin-bottom: 0;">
+        Open <strong>http://127.0.0.1:5000</strong> in your web browser.
+      </p>
+    </div>
+  </div>
+</div>
+
+<!-- 3. Folder Structure & Environment Details -->
+<div class="grid-2" style="margin-bottom: 2rem;">
+  <div class="card">
+    <div class="card-title">
+      <h3>Project Directory Architecture</h3>
+      <span class="badge badge-primary">Clean Modular Layout</span>
+    </div>
+    <pre style="background: var(--bg-surface-alt); padding: 1rem; border-radius: 6px; font-size: 0.825rem; line-height: 1.6; overflow-x: auto;">
+farm-disease-clustering/
+├── data/
+│   ├── animal_disease_dataset.csv     # Raw Kaggle dataset
+│   └── processed_features.csv         # Standardized 30-dim matrix
+├── notebooks/
+│   └── farm_disease_clustering_analysis.ipynb # Fully annotated notebook
+├── src/
+│   ├── __init__.py
+│   ├── preprocessing.py               # Auditing & multi-hot engineering
+│   ├── clustering.py                  # Euclidean KMeans & Manhattan KMedians
+│   ├── evaluation.py                  # WCSS, Silhouette, DBI, PCA
+│   ├── profiling.py                   # Cluster profiles & ANOVA
+│   ├── stability.py                   # Seed & bootstrap ARI stability
+│   └── visualization.py               # Publication figure generator
+├── outputs/
+│   ├── metrics.json                   # All model benchmarks
+│   ├── cluster_profiles.json          # Clinical traits & centroids
+│   ├── stability.json                 # Seed & distance stability
+│   ├── preprocessing_log.json         # Auditable transformation log
+│   ├── pca.json                       # Scree & sampled scatter points
+│   └── figures/                       # PNG and SVG publication plots
+├── templates/                         # Jinja2 multi-page templates
+├── static/                            # CSS, JS, and client assets
+├── app.py                             # Multi-page Flask server & API
+├── run_pipeline.py                    # Master Phase A orchestrator
+├── run_all.bat &amp; run_all.sh           # One-command runners
+├── requirements.txt                   # Dependency lockfile
+└── README.md                          # Full documentation
+    </pre>
+  </div>
+
+  <div class="card">
+    <div class="card-title">
+      <h3>Active Environment &amp; Library Versions</h3>
+      <span class="badge badge-info">Verified Runtime</span>
+    </div>
+    <div class="table-responsive">
+      <table class="data-table">
+        <thead>
+          <tr>
+            <th>Package / Environment</th>
+            <th>Installed Version</th>
+            <th>Purpose</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% if versions %}
+            {% for pkg, ver in versions.items() %}
+            <tr>
+              <td><strong>{{ pkg }}</strong></td>
+              <td><code>{{ ver }}</code></td>
+              <td style="font-size: 0.825rem;">
+                {% if pkg == 'Flask' %}Web application &amp; API routes
+                {% elif pkg == 'scikit-learn' %}K-Means, PCA, Scaler, Metrics
+                {% elif pkg == 'pandas' %}Data wrangling &amp; transformation
+                {% elif pkg == 'numpy' %}Vectorized K-Medians implementation
+                {% elif pkg == 'matplotlib' %}Static publication figures
+                {% elif pkg == 'seaborn' %}Heatmaps &amp; distribution plots
+                {% elif pkg == 'plotly' %}Interactive client-side visualizations
+                {% else %}Core computation runtime
+                {% endif %}
+              </td>
+            </tr>
+            {% endfor %}
+          {% endif %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<!-- 4. Download Links for Artifacts and Figures -->
+<div class="card">
+  <div class="card-title">
+    <h3>Artifact &amp; Figure Direct Downloads</h3>
+    <span class="badge badge-success">Open Science</span>
+  </div>
+  <p style="font-size: 0.9rem;">
+    Download raw pipeline JSON outputs and vector/raster figures:
+  </p>
+
+  <div class="grid-2">
+    <div>
+      <h4>JSON Data Artifacts:</h4>
+      <ul style="list-style: none; padding-left: 0; font-size: 0.9rem; line-height: 2;">
+        <li>📄 <a href="{{ url_for('download_artifact', filename='metrics.json') }}" download>metrics.json</a> (Clustering metrics across k=2..10)</li>
+        <li>📄 <a href="{{ url_for('download_artifact', filename='cluster_profiles.json') }}" download>cluster_profiles.json</a> (Traits, ANOVA, centroids)</li>
+        <li>📄 <a href="{{ url_for('download_artifact', filename='stability.json') }}" download>stability.json</a> (Seed ARI &amp; bootstrap audits)</li>
+        <li>📄 <a href="{{ url_for('download_artifact', filename='preprocessing_log.json') }}" download>preprocessing_log.json</a> (Decision log &amp; audit)</li>
+        <li>📄 <a href="{{ url_for('download_artifact', filename='pca.json') }}" download>pca.json</a> (Scree data &amp; 3D coordinates)</li>
+      </ul>
+    </div>
+
+    <div>
+      <h4>Generated Figures (PNG / SVG):</h4>
+      <div style="max-height: 200px; overflow-y: auto; background: var(--bg-surface-alt); padding: 0.75rem 1rem; border-radius: 6px;">
+        <ul style="list-style: none; padding-left: 0; font-size: 0.85rem; line-height: 1.8;">
+          {% if figures_list %}
+            {% for fig in figures_list %}
+            <li>
+              📊 <a href="{{ url_for('serve_figure', filename=fig) }}" target="_blank">{{ fig }}</a>
+              <a href="{{ url_for('download_artifact', filename=fig) }}" download style="font-size: 0.75rem; color: var(--text-muted); margin-left: 0.5rem;">[Download]</a>
+            </li>
+            {% endfor %}
+          {% else %}
+            <li>Run <code>python run_pipeline.py</code> to generate figures.</li>
+          {% endif %}
+        </ul>
+      </div>
+    </div>
+  </div>
+</div>
+
+{% endblock %}
+

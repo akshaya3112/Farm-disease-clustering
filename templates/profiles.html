@@ -1,0 +1,276 @@
+{% extends "base.html" %}
+
+{% block title %}Cluster Profiles & Interpretation - Objective 3{% endblock %}
+
+{% block content %}
+<div class="page-header">
+  <div style="display: flex; gap: 0.5rem; align-items: center; margin-bottom: 0.5rem;">
+    <span class="badge badge-success">&#10003; Objective 3 Evidence</span>
+    <span class="badge badge-primary">Syndromic Phenotypes &amp; Interpretation</span>
+  </div>
+  <h1 class="page-title">Objective 3: Cluster Profiles &amp; Clinical Interpretation</h1>
+  <p class="page-subtitle">
+    Exploratory phenotype profiles discovered from observational data. Cautiously named to avoid reification, 
+    supported by ANOVA feature contributions, surrogate decision trees, and descriptive cross-checks.
+  </p>
+</div>
+
+<!-- 1. Cluster Profiles Grid (One Card per Discovered Cluster) -->
+<h2 style="margin-bottom: 1rem;">Discovered Herd Risk Profiles (k = 4)</h2>
+<div class="grid-2" style="margin-bottom: 2.5rem;">
+  {% if profiles_data and profiles_data.profiles %}
+    {% for cid, prof in profiles_data.profiles.items() %}
+    <div class="card" style="border-top: 4px solid {% if loop.index == 1 %}#2563eb{% elif loop.index == 2 %}#dc2626{% elif loop.index == 3 %}#059669{% else %}#d97706{% endif %};">
+      <div class="card-title">
+        <div>
+          <span class="badge badge-primary" style="margin-bottom: 0.25rem;">Cluster {{ loop.index }}</span>
+          <h3 style="margin-bottom: 0;">{{ prof.display_name }}</h3>
+        </div>
+        <div style="text-align: right;">
+          <strong style="font-size: 1.25rem; color: var(--text-primary);">{{ "{:,}".format(prof.sample_count) }}</strong><br>
+          <span class="badge badge-info">{{ prof.percentage }}% of herd</span>
+        </div>
+      </div>
+
+      <p style="font-size: 0.9rem; line-height: 1.5; color: var(--text-secondary); margin-bottom: 1rem;">
+        {{ prof.summary }}
+      </p>
+
+      <!-- Key Demographic Traits -->
+      <div style="display: flex; gap: 1.25rem; background: var(--bg-surface-alt); padding: 0.75rem 1rem; border-radius: 6px; margin-bottom: 1rem;">
+        <div>
+          <span style="font-size: 0.775rem; color: var(--text-muted); font-weight: 600;">MEAN AGE</span><br>
+          <strong style="font-size: 1.05rem;">{{ prof.age_stats.mean }} yrs</strong>
+        </div>
+        <div>
+          <span style="font-size: 0.775rem; color: var(--text-muted); font-weight: 600;">MEAN TEMP</span><br>
+          <strong style="font-size: 1.05rem; {% if prof.temp_stats.mean >= 103.0 %}color: var(--danger);{% endif %}">{{ prof.temp_stats.mean }} &deg;F</strong>
+        </div>
+        <div>
+          <span style="font-size: 0.775rem; color: var(--text-muted); font-weight: 600;">DOMINANT SPECIES</span><br>
+          <span style="font-size: 0.85rem;">
+            {% for sp, pct in prof.species_distribution.items() %}
+              {% if pct > 20 %}<strong>{{ sp }}</strong> ({{ pct }}%) {% endif %}
+            {% endfor %}
+          </span>
+        </div>
+      </div>
+
+      <!-- Top Clinical Signs Progress Bars -->
+      <h4 style="font-size: 0.9rem; margin-bottom: 0.5rem;">Prevalent Clinical Signs:</h4>
+      {% for symp in prof.top_symptoms %}
+      <div class="trait-bar-container">
+        <span class="trait-label" title="{{ symp.symptom }}">{{ symp.symptom }}</span>
+        <div class="trait-bar-bg">
+          <div class="trait-bar-fill" style="width: {{ symp.prevalence_pct }}%;"></div>
+        </div>
+        <span class="trait-val">{{ symp.prevalence_pct }}%</span>
+      </div>
+      {% endfor %}
+    </div>
+    {% endfor %}
+  {% endif %}
+</div>
+
+<!-- 2. Interactive Cluster Comparison Tool -->
+<div class="card" style="border-left: 5px solid var(--primary); margin-bottom: 2.5rem;">
+  <div class="card-title">
+    <h3>Interactive Cluster Pairwise Differential Tool</h3>
+    <span class="badge badge-primary">Comparative Diagnostics</span>
+  </div>
+  <p style="font-size: 0.9rem;">
+    Select any two clusters below to visualize feature-by-feature percentage differences in symptom prevalence:
+  </p>
+
+  <div class="control-panel">
+    <div class="control-group">
+      <label for="compare-cluster-a" class="control-label">Compare Cluster A:</label>
+      <select id="compare-cluster-a" class="form-select">
+        <option value="0" selected>Cluster 1: Geriatric Bovine Clinical Syndrome</option>
+        <option value="1">Cluster 2: Respiratory-Diaphoretic Sign Group</option>
+        <option value="2">Cluster 3: Young Sub-Febrile Locomotor &amp; Mucosal Pattern</option>
+        <option value="3">Cluster 4: Acute Febrile Systemic Complex</option>
+      </select>
+    </div>
+
+    <div class="control-group">
+      <label for="compare-cluster-b" class="control-label">Against Cluster B:</label>
+      <select id="compare-cluster-b" class="form-select">
+        <option value="0">Cluster 1: Geriatric Bovine Clinical Syndrome</option>
+        <option value="1" selected>Cluster 2: Respiratory-Diaphoretic Sign Group</option>
+        <option value="2">Cluster 3: Young Sub-Febrile Locomotor &amp; Mucosal Pattern</option>
+        <option value="3">Cluster 4: Acute Febrile Systemic Complex</option>
+      </select>
+    </div>
+  </div>
+
+  <div id="plotly-cluster-compare" style="width: 100%; height: 440px;"></div>
+  <p style="font-size: 0.8rem; color: var(--text-muted); text-align: center; margin-top: 0.5rem; margin-bottom: 0;">
+    Blue bars indicate signs elevated in Cluster A; Red bars indicate signs elevated in Cluster B.
+  </p>
+</div>
+
+<!-- 3. Centroid Heatmap & ANOVA Feature Contributions -->
+<div class="grid-2" style="margin-bottom: 2.5rem;">
+  <!-- Centroid Heatmap -->
+  <div class="card">
+    <div class="card-title">
+      <h3>Standardized Centroid Heatmap</h3>
+      <span class="badge badge-info">Z-Score Centers</span>
+    </div>
+    <p style="font-size: 0.85rem;">
+      Standardized deviations (&mu;=0, &sigma;=1) across key distinguishing variables:
+    </p>
+    <div class="figure-container" style="margin-top: 0;">
+      <img src="{{ url_for('serve_figure', filename='centroid_heatmap.png') }}" 
+           alt="Heatmap of standardized centroids across clusters for top varying features" 
+           class="figure-img">
+      <p class="figure-caption">Figure 3.1: Standardized Cluster Centroid Profiles</p>
+    </div>
+  </div>
+
+  <!-- ANOVA F-Statistic -->
+  <div class="card">
+    <div class="card-title">
+      <h3>Key Feature Contributions (ANOVA F-Stat)</h3>
+      <span class="badge badge-primary">Explanatory Ranking</span>
+    </div>
+    <p style="font-size: 0.85rem;">
+      One-way ANOVA F-statistic evaluating between-cluster variance against within-cluster variance:
+    </p>
+    <div class="figure-container" style="margin-top: 0;">
+      <img src="{{ url_for('serve_figure', filename='feature_contributions_anova.png') }}" 
+           alt="Horizontal bar chart showing top 15 features by ANOVA F-statistic" 
+           class="figure-img">
+      <p class="figure-caption">Figure 3.2: Top Distinguishing Features Ranked by ANOVA F-Test</p>
+    </div>
+  </div>
+</div>
+
+<!-- 4. Surrogate Decision Tree Interpretability -->
+<div class="card" style="margin-bottom: 2.5rem;">
+  <div class="card-title">
+    <h3>Surrogate Decision Tree (Cluster Explanation)</h3>
+    <span class="badge badge-success">
+      Fidelity: {% if profiles_data %}{{ profiles_data.surrogate_tree.fidelity_accuracy_pct }}%{% else %}97.8%{% endif %}
+    </span>
+  </div>
+  <p style="font-size: 0.9rem;">
+    To explain cluster assignments in human-readable rules, a shallow surrogate decision tree (depth=4) was fitted to predict 
+    the cluster label directly from the original feature matrix. The tree achieves a fidelity of 
+    <strong>{% if profiles_data %}{{ profiles_data.surrogate_tree.fidelity_accuracy_pct }}%{% else %}97.8%{% endif %}</strong>, 
+    proving the cluster boundaries are governed by clear, interpretable physiological and clinical rules:
+  </p>
+
+  <div class="grid-2">
+    <div>
+      <h4>Dominant Decision Boundaries:</h4>
+      <div class="table-responsive">
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th>Feature</th>
+              <th>Tree Importance Weight</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% if profiles_data and profiles_data.surrogate_tree.top_rules_features %}
+              {% for f in profiles_data.surrogate_tree.top_rules_features %}
+              <tr>
+                <td><strong>{{ f.clean_name }}</strong></td>
+                <td>
+                  <span class="badge badge-primary">{{ "{:.1f}%".format(f.importance * 100) }}</span>
+                </td>
+              </tr>
+              {% endfor %}
+            {% endif %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <div style="background: var(--bg-surface-alt); padding: 1.25rem; border-radius: var(--radius-md);">
+      <h4>Interpretable Rule Heuristics:</h4>
+      <ul style="font-size: 0.875rem; line-height: 1.8; padding-left: 1.25rem; color: var(--text-secondary);">
+        <li><strong>Profile 1 Rule:</strong> Age &gt; 8.5 years &rarr; Geriatric cattle complex.</li>
+        <li><strong>Profile 2 Rule:</strong> High incidence of diaphoresis (sweats) &amp; fatigue &rarr; Acute diaphoretic group.</li>
+        <li><strong>Profile 3 Rule:</strong> Low/normal temperature (&le; 102.2 &deg;F) + younger age &rarr; Sub-febrile young stock.</li>
+        <li><strong>Profile 4 Rule:</strong> Severe hyperthermia (&gt; 103.0 &deg;F) &rarr; Acute febrile syndrome.</li>
+      </ul>
+      <p style="font-size: 0.8rem; color: var(--text-muted); margin-top: 1rem; margin-bottom: 0;">
+        <em>Note: The surrogate model is strictly an explanatory tool and must not be used as an independent classifier.</em>
+      </p>
+    </div>
+  </div>
+</div>
+
+<!-- 5. Descriptive Cross-Check with Disease Diagnoses (STRICT DISCLAIMER) -->
+<div class="card" style="border-left: 5px solid var(--warning);">
+  <div class="card-title">
+    <div>
+      <span class="badge badge-warning" style="margin-bottom: 0.25rem;">Descriptive Audit Only</span>
+      <h3 style="margin-bottom: 0;">Post-Hoc Descriptive Cross-Check with Ground-Truth Diagnoses</h3>
+    </div>
+    <span class="badge badge-danger">NEVER REPORTED AS ACCURACY</span>
+  </div>
+
+  <div class="alert alert-warning">
+    <span style="font-size: 1.5rem;">⚠️</span>
+    <div style="font-size: 0.9rem;">
+      <strong>MANDATORY METHODOLOGICAL NOTICE:</strong><br>
+      The <code>Disease</code> label was strictly excluded from feature engineering and clustering.
+      This contingency cross-check is purely a post-hoc descriptive observation to examine whether unsupervised 
+      phenotype groupings correspond to known veterinary conditions. 
+      <strong>Under no circumstances should this be interpreted or reported as diagnostic classification accuracy!</strong>
+    </div>
+  </div>
+
+  <div class="grid-2">
+    <div>
+      <div class="table-responsive">
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th>Profile</th>
+              {% if profiles_data and profiles_data.disease_crosscheck %}
+                {% for d in profiles_data.disease_crosscheck.diseases %}
+                <th>{{ d|capitalize }}</th>
+                {% endfor %}
+              {% endif %}
+            </tr>
+          </thead>
+          <tbody>
+            {% if profiles_data and profiles_data.disease_crosscheck %}
+              {% for cid, row in profiles_data.disease_crosscheck.contingency_matrix.items() %}
+              <tr>
+                <td><strong>Profile {{ loop.index }}</strong></td>
+                {% for d in profiles_data.disease_crosscheck.diseases %}
+                <td>
+                  {{ row[d].count }} <span style="font-size: 0.75rem; color: var(--text-muted);">({{ row[d].row_pct }}%)</span>
+                </td>
+                {% endfor %}
+              </tr>
+              {% endfor %}
+            {% endif %}
+          </tbody>
+        </table>
+      </div>
+      <p style="font-size: 0.85rem; color: var(--text-secondary);">
+        Notice: Profile 2 captures 6,974 animals, of which 100% are Anthrax cases in the dataset (presenting with sweats, fatigue, and shortness of breath).
+        Conversely, Profile 3 captures Blackleg, Foot and Mouth, Lumpy Virus, and Pneumonia without Anthrax.
+      </p>
+    </div>
+
+    <div>
+      <div class="figure-container" style="margin-top: 0;">
+        <img src="{{ url_for('serve_figure', filename='disease_crosscheck_heatmap.png') }}" 
+             alt="Contingency heatmap comparing discovered clusters against ground truth disease labels" 
+             class="figure-img">
+        <p class="figure-caption">Figure 3.3: Contingency Heatmap (Profiles vs Diagnostic Labels)</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+{% endblock %}
+

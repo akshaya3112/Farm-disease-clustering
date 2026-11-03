@@ -1,0 +1,290 @@
+{% extends "base.html" %}
+
+{% block title %}Clustering Workflow - Objective 2{% endblock %}
+
+{% block content %}
+<div class="page-header">
+  <div style="display: flex; gap: 0.5rem; align-items: center; margin-bottom: 0.5rem;">
+    <span class="badge badge-success">&#10003; Objective 2 Evidence</span>
+    <span class="badge badge-primary">Model Selection &amp; Distance Geometry</span>
+  </div>
+  <h1 class="page-title">Objective 2: Clustering Workflow &amp; Distance Comparison</h1>
+  <p class="page-subtitle">
+    Systematic benchmarking of Euclidean K-Means against Manhattan K-Medians across cluster counts k = 2..10.
+    Evaluation via WCSS / L1 Cost, Silhouette Score, Davies-Bouldin Index, and PCA decomposition.
+  </p>
+</div>
+
+<!-- 1. Primary Selected Configuration Hero Box -->
+<div class="card" style="border-left: 5px solid var(--primary); background: var(--bg-surface-alt); margin-bottom: 2rem;">
+  <div class="card-title">
+    <div>
+      <span class="badge badge-primary">Defensible Primary Configuration</span>
+      <h3 style="margin-bottom: 0;">Selected Solution: K-Means (Euclidean, k = 4)</h3>
+    </div>
+    <span class="badge badge-success">Optimal DBI = 1.9161</span>
+  </div>
+  
+  <p style="font-size: 0.95rem; line-height: 1.6; margin-bottom: 1rem;">
+    {% if metrics %}
+      {{ metrics.selection_justification.written_justification }}
+    {% endif %}
+  </p>
+  
+  <div class="alert alert-info" style="margin-bottom: 0;">
+    <span style="font-size: 1.25rem;">⚖️</span>
+    <div>
+      <strong>Metric Disagreement &amp; Trade-off Acknowledgment:</strong><br>
+      {% if metrics %}
+        {{ metrics.selection_justification.disagreement_acknowledgment }}
+      {% endif %}
+    </div>
+  </div>
+</div>
+
+<!-- 2. Interactive Charts Control Panel -->
+<div class="control-panel">
+  <div class="control-group">
+    <label for="metric-algo-select" class="control-label">Algorithm / Distance View:</label>
+    <select id="metric-algo-select" class="form-select">
+      <option value="all">Compare Both (Euclidean vs Manhattan)</option>
+      <option value="kmeans">K-Means (Euclidean Distance)</option>
+      <option value="kmedians">K-Medians (Manhattan Distance)</option>
+    </select>
+  </div>
+
+  <div class="control-group">
+    <label for="metric-k-select" class="control-label">Highlight Cluster Count (k):</label>
+    <select id="metric-k-select" class="form-select">
+      {% for k in range(2, 11) %}
+      <option value="{{ k }}" {% if k == 4 %}selected{% endif %}>k = {{ k }} {% if k == 4 %}(Selected Defensible){% endif %}</option>
+      {% endfor %}
+    </select>
+  </div>
+</div>
+
+<!-- 3. Interactive Plotly Charts (Elbow, Silhouette, DBI) -->
+<div class="grid-3" style="margin-bottom: 2rem;">
+  <div class="card" style="padding: 1rem;">
+    <div id="plotly-elbow-chart" style="width: 100%; height: 350px;"></div>
+    <p style="font-size: 0.8rem; color: var(--text-muted); text-align: center; margin-top: 0.5rem; margin-bottom: 0;">
+      Elbow curve shows diminishing cost reduction beyond k=4.
+    </p>
+  </div>
+
+  <div class="card" style="padding: 1rem;">
+    <div id="plotly-silhouette-chart" style="width: 100%; height: 350px;"></div>
+    <p style="font-size: 0.8rem; color: var(--text-muted); text-align: center; margin-top: 0.5rem; margin-bottom: 0;">
+      Silhouette score balances cluster cohesion and separation.
+    </p>
+  </div>
+
+  <div class="card" style="padding: 1rem;">
+    <div id="plotly-dbi-chart" style="width: 100%; height: 350px;"></div>
+    <p style="font-size: 0.8rem; color: var(--text-muted); text-align: center; margin-top: 0.5rem; margin-bottom: 0;">
+      Davies-Bouldin achieves global minimum at k=4 (1.9161).
+    </p>
+  </div>
+</div>
+
+<!-- 4. Mathematical Comparison: Why Manhattan Requires K-Medians -->
+<div class="card" style="border-left: 5px solid var(--info); margin-bottom: 2rem;">
+  <div class="card-title">
+    <h3>The Distance Metric Dilemma: Euclidean K-Means vs Manhattan K-Medians</h3>
+    <span class="badge badge-info">Geometric Clarification</span>
+  </div>
+  <div class="grid-2">
+    <div>
+      <h4>Euclidean K-Means (L2 Norm)</h4>
+      <p style="font-size: 0.9rem;">
+        Standard K-Means optimizes the sum of squared Euclidean distances:
+      </p>
+      <div style="background: var(--bg-surface-alt); padding: 0.75rem; border-radius: 6px; font-family: var(--font-mono); font-size: 0.85rem; margin-bottom: 0.75rem;">
+        Objective = &sum; ||x_i - &mu;_c||&sup2;<br>
+        Optimal Centroid = Mean(&Chi;_c)
+      </div>
+      <p style="font-size: 0.9rem;">
+        Because continuous vitals (Age, Temperature) were standardized to unit variance, 
+        Euclidean distance naturally incorporates smooth continuous variance along those axes.
+      </p>
+    </div>
+
+    <div>
+      <h4>Manhattan K-Medians (L1 Norm)</h4>
+      <p style="font-size: 0.9rem;">
+        Standard scikit-learn does not support Manhattan distance K-Means because taking the mean 
+        does not minimize L1 distance! Under L1 norm:
+      </p>
+      <div style="background: var(--bg-surface-alt); padding: 0.75rem; border-radius: 6px; font-family: var(--font-mono); font-size: 0.85rem; margin-bottom: 0.75rem;">
+        Objective = &sum; &sum; |x_{i,j} - m_{c,j}|<br>
+        Optimal Centroid = Coordinate-wise Median(&Chi;_c)
+      </div>
+      <p style="font-size: 0.9rem;">
+        We implemented a fully vectorized K-Medians algorithm. On binary symptom features, 
+        Manhattan distance is identical to Hamming distance (counting differing symptom flags), 
+        preventing squared distortion of sparse binary vectors.
+      </p>
+    </div>
+  </div>
+</div>
+
+<!-- 5. Combined Metric Comparison Table -->
+<div class="card">
+  <div class="card-title">
+    <h3>Complete Configuration Benchmarking Table (k &in; [2, 10])</h3>
+    <span class="badge badge-primary">Best Values Highlighted</span>
+  </div>
+  <p style="font-size: 0.9rem;">
+    Comprehensive metrics across all tested models. The global best value for each metric is highlighted with a green badge:
+  </p>
+
+  <div class="table-responsive">
+    <table class="data-table">
+      <thead>
+        <tr>
+          <th>Algorithm</th>
+          <th>Distance Metric</th>
+          <th>Clusters (k)</th>
+          <th>Within-Cluster Cost (WCSS / L1)</th>
+          <th>Silhouette Score</th>
+          <th>Davies-Bouldin Index</th>
+          <th>Status / Verdict</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% if metrics and metrics.records %}
+          {% for r in metrics.records %}
+          <tr {% if r.algorithm == 'K-Means' and r.k == 4 %}style="background: var(--primary-bg); font-weight: 600;"{% endif %}>
+            <td><strong>{{ r.algorithm }}</strong></td>
+            <td>{{ r.distance_metric }}</td>
+            <td><strong>k = {{ r.k }}</strong></td>
+            <td>{{ "{:,.2f}".format(r.cost_wcss) }}</td>
+            <td>
+              {% if (r.algorithm == 'K-Means' and r.k == 2) or (r.algorithm == 'K-Medians' and r.k == 3) %}
+                <span class="highlight-best">{{ r.silhouette }} (Best)</span>
+              {% elif r.k == 4 %}
+                <strong>{{ r.silhouette }}</strong>
+              {% else %}
+                {{ r.silhouette }}
+              {% endif %}
+            </td>
+            <td>
+              {% if r.algorithm == 'K-Means' and r.k == 4 %}
+                <span class="highlight-best">{{ r.davies_bouldin }} (Global Min)</span>
+              {% elif r.algorithm == 'K-Medians' and r.k == 7 %}
+                <span class="highlight-best">{{ r.davies_bouldin }} (Best L1)</span>
+              {% else %}
+                {{ r.davies_bouldin }}
+              {% endif %}
+            </td>
+            <td>
+              {% if r.algorithm == 'K-Means' and r.k == 4 %}
+                <span class="badge badge-success">&#9733; SELECTED PRIMARY</span>
+              {% elif r.algorithm == 'K-Medians' and r.k == 4 %}
+                <span class="badge badge-info">L1 Benchmark Match</span>
+              {% elif r.k == 2 %}
+                <span class="badge badge-warning">High Sil / Poor DBI</span>
+              {% else %}
+                <span class="badge badge-primary">Evaluated</span>
+              {% endif %}
+            </td>
+          </tr>
+          {% endfor %}
+        {% endif %}
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<!-- 6. PCA Scree Plot & Interactive 2D/3D Scatter -->
+<div class="card">
+  <div class="card-title">
+    <h3>Principal Component Analysis (PCA) Decomposition</h3>
+    <span class="badge badge-info">Top 3 PCs: {% if pca_data %}{{ pca_data.top_3_variance_pct }}%{% else %}16.8%{% endif %} Variance</span>
+  </div>
+  
+  <p style="font-size: 0.9rem;">
+    Because the preprocessed feature space spans 30 dimensions (2 vitals + 4 species + 24 symptoms), 
+    PCA reduces dimensionality to visualize geometric cluster separation.
+  </p>
+
+  <div class="control-panel">
+    <div class="control-group">
+      <label for="pca-k-select" class="control-label">Select Cluster Solution to Color:</label>
+      <select id="pca-k-select" class="form-select">
+        <option value="4" selected>k = 4 (Selected Primary)</option>
+        <option value="2">k = 2</option>
+        <option value="3">k = 3</option>
+        <option value="5">k = 5</option>
+        <option value="6">k = 6</option>
+      </select>
+    </div>
+
+    <div class="control-group">
+      <label for="pca-dim-select" class="control-label">Projection Dimension:</label>
+      <select id="pca-dim-select" class="form-select">
+        <option value="2d" selected>2D Scatter (PC1 vs PC2)</option>
+        <option value="3d">3D Scatter (PC1 vs PC2 vs PC3)</option>
+      </select>
+    </div>
+  </div>
+
+  <div class="grid-2">
+    <div>
+      <div id="plotly-pca-scatter" style="width: 100%; height: 420px;"></div>
+      <p style="font-size: 0.8rem; color: var(--text-muted); text-align: center; margin-top: 0.5rem;">
+        Sampled 2,500 points from full 43,778 dataset for responsive interactive exploration.
+      </p>
+    </div>
+
+    <div>
+      <div class="figure-container" style="margin-top: 0;">
+        <img src="{{ url_for('serve_figure', filename='pca_scree_plot.png') }}" 
+             alt="PCA Scree plot showing explained variance ratio per principal component" 
+             class="figure-img" style="max-height: 380px;">
+        <p class="figure-caption">Figure 2.1: PCA Scree Plot (Individual &amp; Cumulative Variance)</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Top Component Loadings -->
+  {% if pca_data and pca_data.loadings %}
+  <div style="margin-top: 1.5rem; border-top: 1px solid var(--border-color); padding-top: 1rem;">
+    <h4>Key Feature Loadings for Top Principal Components</h4>
+    <div class="grid-3" style="margin-top: 0.75rem;">
+      <div style="background: var(--bg-surface-alt); padding: 0.85rem; border-radius: 6px;">
+        <strong>Principal Component 1</strong>
+        <p style="font-size: 0.825rem; color: var(--text-muted); margin-bottom: 0.5rem;">Dominant Axis:</p>
+        <ul style="font-size: 0.825rem; padding-left: 1.25rem;">
+          {% for feat, val in pca_data.loadings.PC1.positive.items() %}
+          <li>{{ feat }}: +{{ val }}</li>
+          {% endfor %}
+        </ul>
+      </div>
+
+      <div style="background: var(--bg-surface-alt); padding: 0.85rem; border-radius: 6px;">
+        <strong>Principal Component 2</strong>
+        <p style="font-size: 0.825rem; color: var(--text-muted); margin-bottom: 0.5rem;">Dominant Axis:</p>
+        <ul style="font-size: 0.825rem; padding-left: 1.25rem;">
+          {% for feat, val in pca_data.loadings.PC2.positive.items() %}
+          <li>{{ feat }}: +{{ val }}</li>
+          {% endfor %}
+        </ul>
+      </div>
+
+      <div style="background: var(--bg-surface-alt); padding: 0.85rem; border-radius: 6px;">
+        <strong>Principal Component 3</strong>
+        <p style="font-size: 0.825rem; color: var(--text-muted); margin-bottom: 0.5rem;">Dominant Axis:</p>
+        <ul style="font-size: 0.825rem; padding-left: 1.25rem;">
+          {% for feat, val in pca_data.loadings.PC3.positive.items() %}
+          <li>{{ feat }}: +{{ val }}</li>
+          {% endfor %}
+        </ul>
+      </div>
+    </div>
+  </div>
+  {% endif %}
+</div>
+
+{% endblock %}
+

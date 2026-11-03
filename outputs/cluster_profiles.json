@@ -1,0 +1,732 @@
+{
+  "profiles": {
+    "0": {
+      "cluster_id": 0,
+      "display_name": "Profile 1: Geriatric Bovine Clinical Syndrome",
+      "sample_count": 10564,
+      "percentage": 24.13,
+      "summary": "Characterized by mature/geriatric age (mean 11.93 yrs, heavily cow/buffalo) with dominant signs of loss of appetite (75.7%) and depression (51.2%).",
+      "age_stats": {
+        "mean": 11.93,
+        "median": 12.0
+      },
+      "temp_stats": {
+        "mean": 102.2,
+        "median": 102.2
+      },
+      "species_distribution": {
+        "cow": 44.0,
+        "buffalo": 42.7,
+        "goat": 6.7,
+        "sheep": 6.5
+      },
+      "top_symptoms": [
+        {
+          "symptom": "loss of appetite",
+          "prevalence_pct": 75.7
+        },
+        {
+          "symptom": "depression",
+          "prevalence_pct": 51.2
+        },
+        {
+          "symptom": "painless lumps",
+          "prevalence_pct": 36.5
+        },
+        {
+          "symptom": "difficulty walking",
+          "prevalence_pct": 20.2
+        },
+        {
+          "symptom": "lameness",
+          "prevalence_pct": 19.3
+        },
+        {
+          "symptom": "crackling sound",
+          "prevalence_pct": 15.2
+        }
+      ],
+      "all_symptom_prevalence": {
+        "blisters on gums": 2.9,
+        "blisters on hooves": 3.1,
+        "blisters on mouth": 2.8,
+        "blisters on tongue": 3.1,
+        "chest discomfort": 7.1,
+        "chills": 6.5,
+        "crackling sound": 15.2,
+        "depression": 51.2,
+        "difficulty walking": 20.2,
+        "fatigue": 7.3,
+        "lameness": 19.3,
+        "loss of appetite": 75.7,
+        "painless lumps": 36.5,
+        "shortness of breath": 7.2,
+        "sores on gums": 3.3,
+        "sores on hooves": 3.0,
+        "sores on mouth": 3.0,
+        "sores on tongue": 3.4,
+        "sweats": 6.8,
+        "swelling in abdomen": 2.7,
+        "swelling in extremities": 2.6,
+        "swelling in limb": 7.3,
+        "swelling in muscle": 7.4,
+        "swelling in neck": 2.4
+      },
+      "standardized_centroids": {
+        "age_std": 1.3266,
+        "temp_std": -0.053,
+        "animal_buffalo": 0.4275,
+        "animal_cow": 0.4396,
+        "animal_goat": 0.0675,
+        "animal_sheep": 0.0654,
+        "symptom_blisters_on_gums": 0.0291,
+        "symptom_blisters_on_hooves": 0.0312,
+        "symptom_blisters_on_mouth": 0.028,
+        "symptom_blisters_on_tongue": 0.0307,
+        "symptom_chest_discomfort": 0.0712,
+        "symptom_chills": 0.065,
+        "symptom_crackling_sound": 0.1519,
+        "symptom_depression": 0.5123,
+        "symptom_difficulty_walking": 0.2018,
+        "symptom_fatigue": 0.0731,
+        "symptom_lameness": 0.1935,
+        "symptom_loss_of_appetite": 0.7574,
+        "symptom_painless_lumps": 0.3645,
+        "symptom_shortness_of_breath": 0.0717,
+        "symptom_sores_on_gums": 0.0326,
+        "symptom_sores_on_hooves": 0.0301,
+        "symptom_sores_on_mouth": 0.0299,
+        "symptom_sores_on_tongue": 0.0335,
+        "symptom_sweats": 0.0682,
+        "symptom_swelling_in_abdomen": 0.0273,
+        "symptom_swelling_in_extremities": 0.0262,
+        "symptom_swelling_in_limb": 0.0734,
+        "symptom_swelling_in_muscle": 0.0738,
+        "symptom_swelling_in_neck": 0.0237
+      }
+    },
+    "1": {
+      "cluster_id": 1,
+      "display_name": "Profile 2: Respiratory-Diaphoretic Sign Group",
+      "sample_count": 6974,
+      "percentage": 15.93,
+      "summary": "Dominant presentation of systemic sweating, fatigue, and dyspnea (top signs: sweats 51.1%, fatigue 50.9%) with moderate temperature (101.79 deg F).",
+      "age_stats": {
+        "mean": 5.62,
+        "median": 6.0
+      },
+      "temp_stats": {
+        "mean": 101.79,
+        "median": 101.7
+      },
+      "species_distribution": {
+        "sheep": 29.6,
+        "goat": 28.6,
+        "buffalo": 21.4,
+        "cow": 20.4
+      },
+      "top_symptoms": [
+        {
+          "symptom": "sweats",
+          "prevalence_pct": 51.1
+        },
+        {
+          "symptom": "fatigue",
+          "prevalence_pct": 50.9
+        },
+        {
+          "symptom": "shortness of breath",
+          "prevalence_pct": 50.5
+        },
+        {
+          "symptom": "chest discomfort",
+          "prevalence_pct": 50.3
+        },
+        {
+          "symptom": "chills",
+          "prevalence_pct": 50.0
+        },
+        {
+          "symptom": "swelling in abdomen",
+          "prevalence_pct": 16.1
+        }
+      ],
+      "all_symptom_prevalence": {
+        "blisters on gums": 0.0,
+        "blisters on hooves": 0.0,
+        "blisters on mouth": 0.0,
+        "blisters on tongue": 0.0,
+        "chest discomfort": 50.3,
+        "chills": 50.0,
+        "crackling sound": 0.0,
+        "depression": 0.0,
+        "difficulty walking": 0.0,
+        "fatigue": 50.9,
+        "lameness": 0.0,
+        "loss of appetite": 0.0,
+        "painless lumps": 0.0,
+        "shortness of breath": 50.5,
+        "sores on gums": 0.0,
+        "sores on hooves": 0.0,
+        "sores on mouth": 0.0,
+        "sores on tongue": 0.0,
+        "sweats": 51.1,
+        "swelling in abdomen": 16.1,
+        "swelling in extremities": 15.8,
+        "swelling in limb": 0.0,
+        "swelling in muscle": 0.0,
+        "swelling in neck": 15.2
+      },
+      "standardized_centroids": {
+        "age_std": -0.2953,
+        "temp_std": -0.342,
+        "animal_buffalo": 0.2142,
+        "animal_cow": 0.2036,
+        "animal_goat": 0.2865,
+        "animal_sheep": 0.2957,
+        "symptom_blisters_on_gums": 0.0,
+        "symptom_blisters_on_hooves": 0.0,
+        "symptom_blisters_on_mouth": 0.0,
+        "symptom_blisters_on_tongue": 0.0,
+        "symptom_chest_discomfort": 0.5029,
+        "symptom_chills": 0.5001,
+        "symptom_crackling_sound": 0.0,
+        "symptom_depression": 0.0,
+        "symptom_difficulty_walking": 0.0,
+        "symptom_fatigue": 0.5093,
+        "symptom_lameness": 0.0,
+        "symptom_loss_of_appetite": 0.0,
+        "symptom_painless_lumps": 0.0,
+        "symptom_shortness_of_breath": 0.5052,
+        "symptom_sores_on_gums": 0.0,
+        "symptom_sores_on_hooves": 0.0,
+        "symptom_sores_on_mouth": 0.0,
+        "symptom_sores_on_tongue": 0.0,
+        "symptom_sweats": 0.5115,
+        "symptom_swelling_in_abdomen": 0.1607,
+        "symptom_swelling_in_extremities": 0.1582,
+        "symptom_swelling_in_limb": 0.0,
+        "symptom_swelling_in_muscle": 0.0,
+        "symptom_swelling_in_neck": 0.1521
+      }
+    },
+    "2": {
+      "cluster_id": 2,
+      "display_name": "Profile 3: Young Sub-Febrile Locomotor & Mucosal Pattern",
+      "sample_count": 14081,
+      "percentage": 32.16,
+      "summary": "Presents in younger stock (mean age 4.81 yrs) with lower-normative temperature (101.2 deg F) and focal complaints of loss of appetite (89.0%).",
+      "age_stats": {
+        "mean": 4.81,
+        "median": 5.0
+      },
+      "temp_stats": {
+        "mean": 101.2,
+        "median": 101.2
+      },
+      "species_distribution": {
+        "goat": 31.0,
+        "sheep": 29.8,
+        "buffalo": 19.7,
+        "cow": 19.4
+      },
+      "top_symptoms": [
+        {
+          "symptom": "loss of appetite",
+          "prevalence_pct": 89.0
+        },
+        {
+          "symptom": "depression",
+          "prevalence_pct": 59.6
+        },
+        {
+          "symptom": "painless lumps",
+          "prevalence_pct": 42.1
+        },
+        {
+          "symptom": "difficulty walking",
+          "prevalence_pct": 23.1
+        },
+        {
+          "symptom": "lameness",
+          "prevalence_pct": 22.9
+        },
+        {
+          "symptom": "crackling sound",
+          "prevalence_pct": 17.2
+        }
+      ],
+      "all_symptom_prevalence": {
+        "blisters on gums": 3.7,
+        "blisters on hooves": 3.5,
+        "blisters on mouth": 3.5,
+        "blisters on tongue": 3.6,
+        "chest discomfort": 0.0,
+        "chills": 0.0,
+        "crackling sound": 17.2,
+        "depression": 59.6,
+        "difficulty walking": 23.1,
+        "fatigue": 0.0,
+        "lameness": 22.9,
+        "loss of appetite": 89.0,
+        "painless lumps": 42.1,
+        "shortness of breath": 0.0,
+        "sores on gums": 3.7,
+        "sores on hooves": 3.7,
+        "sores on mouth": 3.7,
+        "sores on tongue": 3.7,
+        "sweats": 0.0,
+        "swelling in abdomen": 0.0,
+        "swelling in extremities": 0.0,
+        "swelling in limb": 8.2,
+        "swelling in muscle": 8.8,
+        "swelling in neck": 0.0
+      },
+      "standardized_centroids": {
+        "age_std": -0.5039,
+        "temp_std": -0.7618,
+        "animal_buffalo": 0.1974,
+        "animal_cow": 0.1939,
+        "animal_goat": 0.3101,
+        "animal_sheep": 0.2985,
+        "symptom_blisters_on_gums": 0.0369,
+        "symptom_blisters_on_hooves": 0.0352,
+        "symptom_blisters_on_mouth": 0.0349,
+        "symptom_blisters_on_tongue": 0.0363,
+        "symptom_chest_discomfort": 0.0,
+        "symptom_chills": 0.0,
+        "symptom_crackling_sound": 0.1724,
+        "symptom_depression": 0.5961,
+        "symptom_difficulty_walking": 0.231,
+        "symptom_fatigue": 0.0,
+        "symptom_lameness": 0.2291,
+        "symptom_loss_of_appetite": 0.8901,
+        "symptom_painless_lumps": 0.421,
+        "symptom_shortness_of_breath": 0.0,
+        "symptom_sores_on_gums": 0.0366,
+        "symptom_sores_on_hooves": 0.0372,
+        "symptom_sores_on_mouth": 0.0365,
+        "symptom_sores_on_tongue": 0.0369,
+        "symptom_sweats": 0.0,
+        "symptom_swelling_in_abdomen": 0.0,
+        "symptom_swelling_in_extremities": 0.0,
+        "symptom_swelling_in_limb": 0.082,
+        "symptom_swelling_in_muscle": 0.0878,
+        "symptom_swelling_in_neck": 0.0
+      }
+    },
+    "3": {
+      "cluster_id": 3,
+      "display_name": "Profile 4: Acute Febrile Systemic Complex",
+      "sample_count": 12159,
+      "percentage": 27.77,
+      "summary": "Marked by severe hyperthermia (mean temp 103.84 deg F), high prevalence of loss of appetite (78.7%) and depression (53.7%).",
+      "age_stats": {
+        "mean": 5.22,
+        "median": 5.0
+      },
+      "temp_stats": {
+        "mean": 103.84,
+        "median": 103.9
+      },
+      "species_distribution": {
+        "sheep": 30.4,
+        "goat": 29.2,
+        "cow": 20.2,
+        "buffalo": 20.1
+      },
+      "top_symptoms": [
+        {
+          "symptom": "loss of appetite",
+          "prevalence_pct": 78.7
+        },
+        {
+          "symptom": "depression",
+          "prevalence_pct": 53.7
+        },
+        {
+          "symptom": "painless lumps",
+          "prevalence_pct": 39.0
+        },
+        {
+          "symptom": "difficulty walking",
+          "prevalence_pct": 19.9
+        },
+        {
+          "symptom": "lameness",
+          "prevalence_pct": 19.8
+        },
+        {
+          "symptom": "crackling sound",
+          "prevalence_pct": 15.2
+        }
+      ],
+      "all_symptom_prevalence": {
+        "blisters on gums": 2.9,
+        "blisters on hooves": 3.3,
+        "blisters on mouth": 3.1,
+        "blisters on tongue": 2.9,
+        "chest discomfort": 5.5,
+        "chills": 5.5,
+        "crackling sound": 15.2,
+        "depression": 53.7,
+        "difficulty walking": 19.9,
+        "fatigue": 5.4,
+        "lameness": 19.8,
+        "loss of appetite": 78.7,
+        "painless lumps": 39.0,
+        "shortness of breath": 5.7,
+        "sores on gums": 3.2,
+        "sores on hooves": 3.0,
+        "sores on mouth": 3.2,
+        "sores on tongue": 3.2,
+        "sweats": 5.3,
+        "swelling in abdomen": 2.2,
+        "swelling in extremities": 2.0,
+        "swelling in limb": 7.2,
+        "swelling in muscle": 8.0,
+        "swelling in neck": 2.1
+      },
+      "standardized_centroids": {
+        "age_std": -0.3997,
+        "temp_std": 1.1245,
+        "animal_buffalo": 0.2013,
+        "animal_cow": 0.2022,
+        "animal_goat": 0.292,
+        "animal_sheep": 0.3045,
+        "symptom_blisters_on_gums": 0.0288,
+        "symptom_blisters_on_hooves": 0.033,
+        "symptom_blisters_on_mouth": 0.0314,
+        "symptom_blisters_on_tongue": 0.0293,
+        "symptom_chest_discomfort": 0.0547,
+        "symptom_chills": 0.0552,
+        "symptom_crackling_sound": 0.1525,
+        "symptom_depression": 0.5369,
+        "symptom_difficulty_walking": 0.199,
+        "symptom_fatigue": 0.0541,
+        "symptom_lameness": 0.198,
+        "symptom_loss_of_appetite": 0.7866,
+        "symptom_painless_lumps": 0.3901,
+        "symptom_shortness_of_breath": 0.0573,
+        "symptom_sores_on_gums": 0.0323,
+        "symptom_sores_on_hooves": 0.0299,
+        "symptom_sores_on_mouth": 0.0322,
+        "symptom_sores_on_tongue": 0.0316,
+        "symptom_sweats": 0.0526,
+        "symptom_swelling_in_abdomen": 0.0223,
+        "symptom_swelling_in_extremities": 0.0201,
+        "symptom_swelling_in_limb": 0.0716,
+        "symptom_swelling_in_muscle": 0.0796,
+        "symptom_swelling_in_neck": 0.0211
+      }
+    }
+  },
+  "anova_ranking": [
+    {
+      "feature": "age_std",
+      "clean_name": "age (scaled)",
+      "f_statistic": 18924.0,
+      "p_value": 0.0
+    },
+    {
+      "feature": "temp_std",
+      "clean_name": "temp (scaled)",
+      "f_statistic": 18359.13,
+      "p_value": 0.0
+    },
+    {
+      "feature": "symptom_loss_of_appetite",
+      "clean_name": "loss of appetite",
+      "f_statistic": 11011.31,
+      "p_value": 0.0
+    },
+    {
+      "feature": "symptom_sweats",
+      "clean_name": "sweats",
+      "f_statistic": 6538.4,
+      "p_value": 0.0
+    },
+    {
+      "feature": "symptom_fatigue",
+      "clean_name": "fatigue",
+      "f_statistic": 6318.78,
+      "p_value": 0.0
+    },
+    {
+      "feature": "symptom_chills",
+      "clean_name": "chills",
+      "f_statistic": 6232.08,
+      "p_value": 0.0
+    },
+    {
+      "feature": "symptom_chest_discomfort",
+      "clean_name": "chest discomfort",
+      "f_statistic": 6175.86,
+      "p_value": 0.0
+    },
+    {
+      "feature": "symptom_shortness_of_breath",
+      "clean_name": "shortness of breath",
+      "f_statistic": 6150.73,
+      "p_value": 0.0
+    },
+    {
+      "feature": "symptom_depression",
+      "clean_name": "depression",
+      "f_statistic": 2960.11,
+      "p_value": 0.0
+    },
+    {
+      "feature": "symptom_painless_lumps",
+      "clean_name": "painless lumps",
+      "f_statistic": 1550.92,
+      "p_value": 0.0
+    },
+    {
+      "feature": "symptom_swelling_in_extremities",
+      "clean_name": "swelling in extremities",
+      "f_statistic": 1282.76,
+      "p_value": 0.0
+    },
+    {
+      "feature": "symptom_swelling_in_abdomen",
+      "clean_name": "swelling in abdomen",
+      "f_statistic": 1272.74,
+      "p_value": 0.0
+    },
+    {
+      "feature": "symptom_swelling_in_neck",
+      "clean_name": "swelling in neck",
+      "f_statistic": 1220.59,
+      "p_value": 0.0
+    },
+    {
+      "feature": "animal_cow",
+      "clean_name": "Species: cow",
+      "f_statistic": 858.47,
+      "p_value": 0.0
+    },
+    {
+      "feature": "animal_sheep",
+      "clean_name": "Species: sheep",
+      "f_statistic": 845.82,
+      "p_value": 0.0
+    },
+    {
+      "feature": "animal_goat",
+      "clean_name": "Species: goat",
+      "f_statistic": 826.06,
+      "p_value": 0.0
+    },
+    {
+      "feature": "animal_buffalo",
+      "clean_name": "Species: buffalo",
+      "f_statistic": 748.26,
+      "p_value": 0.0
+    },
+    {
+      "feature": "symptom_difficulty_walking",
+      "clean_name": "difficulty walking",
+      "f_statistic": 646.02,
+      "p_value": 0.0
+    },
+    {
+      "feature": "symptom_lameness",
+      "clean_name": "lameness",
+      "f_statistic": 637.04,
+      "p_value": 0.0
+    },
+    {
+      "feature": "symptom_crackling_sound",
+      "clean_name": "crackling sound",
+      "f_statistic": 453.25,
+      "p_value": 4.918861579285043e-290
+    },
+    {
+      "feature": "symptom_swelling_in_muscle",
+      "clean_name": "swelling in muscle",
+      "f_statistic": 211.78,
+      "p_value": 2.136779286248587e-136
+    },
+    {
+      "feature": "symptom_swelling_in_limb",
+      "clean_name": "swelling in limb",
+      "f_statistic": 195.98,
+      "p_value": 2.9196069243164323e-126
+    },
+    {
+      "feature": "symptom_sores_on_tongue",
+      "clean_name": "sores on tongue",
+      "f_statistic": 84.6,
+      "p_value": 1.4213597048543077e-54
+    },
+    {
+      "feature": "symptom_sores_on_hooves",
+      "clean_name": "sores on hooves",
+      "f_statistic": 84.42,
+      "p_value": 1.8531968530661613e-54
+    },
+    {
+      "feature": "symptom_blisters_on_gums",
+      "clean_name": "blisters on gums",
+      "f_statistic": 83.8,
+      "p_value": 4.6266310196062214e-54
+    },
+    {
+      "feature": "symptom_sores_on_gums",
+      "clean_name": "sores on gums",
+      "f_statistic": 83.67,
+      "p_value": 5.646283069009189e-54
+    },
+    {
+      "feature": "symptom_sores_on_mouth",
+      "clean_name": "sores on mouth",
+      "f_statistic": 83.25,
+      "p_value": 1.0470497517964653e-53
+    },
+    {
+      "feature": "symptom_blisters_on_tongue",
+      "clean_name": "blisters on tongue",
+      "f_statistic": 82.36,
+      "p_value": 3.957239830121988e-53
+    },
+    {
+      "feature": "symptom_blisters_on_hooves",
+      "clean_name": "blisters on hooves",
+      "f_statistic": 81.38,
+      "p_value": 1.688562796012086e-52
+    },
+    {
+      "feature": "symptom_blisters_on_mouth",
+      "clean_name": "blisters on mouth",
+      "f_statistic": 80.1,
+      "p_value": 1.1390171861488182e-51
+    }
+  ],
+  "surrogate_tree": {
+    "depth": 4,
+    "fidelity_accuracy_pct": 90.94,
+    "top_rules_features": [
+      {
+        "feature": "age_std",
+        "clean_name": "age (scaled)",
+        "importance": 0.3906
+      },
+      {
+        "feature": "temp_std",
+        "clean_name": "temp (scaled)",
+        "importance": 0.3406
+      },
+      {
+        "feature": "symptom_loss_of_appetite",
+        "clean_name": "loss of appetite",
+        "importance": 0.2089
+      },
+      {
+        "feature": "symptom_depression",
+        "clean_name": "depression",
+        "importance": 0.06
+      }
+    ]
+  },
+  "disease_crosscheck": {
+    "disclaimer": "IMPORTANT METHODOLOGICAL NOTICE: The Disease labels were NEVER used during feature engineering, distance calculation, or cluster generation. This cross-check is strictly a post-hoc descriptive investigation to observe how unsupervised clinical phenotype profiles align with veterinary diagnoses. It is NOT a measure of diagnostic classification accuracy, as clustering is an exploratory pattern discovery technique.",
+    "diseases": [
+      "anthrax",
+      "blackleg",
+      "foot and mouth",
+      "lumpy virus",
+      "pneumonia"
+    ],
+    "contingency_matrix": {
+      "0": {
+        "anthrax": {
+          "count": 1501,
+          "row_pct": 14.21
+        },
+        "blackleg": {
+          "count": 2623,
+          "row_pct": 24.83
+        },
+        "foot and mouth": {
+          "count": 2589,
+          "row_pct": 24.51
+        },
+        "lumpy virus": {
+          "count": 1896,
+          "row_pct": 17.95
+        },
+        "pneumonia": {
+          "count": 1955,
+          "row_pct": 18.51
+        }
+      },
+      "1": {
+        "anthrax": {
+          "count": 6974,
+          "row_pct": 100.0
+        },
+        "blackleg": {
+          "count": 0,
+          "row_pct": 0.0
+        },
+        "foot and mouth": {
+          "count": 0,
+          "row_pct": 0.0
+        },
+        "lumpy virus": {
+          "count": 0,
+          "row_pct": 0.0
+        },
+        "pneumonia": {
+          "count": 0,
+          "row_pct": 0.0
+        }
+      },
+      "2": {
+        "anthrax": {
+          "count": 0,
+          "row_pct": 0.0
+        },
+        "blackleg": {
+          "count": 4062,
+          "row_pct": 28.85
+        },
+        "foot and mouth": {
+          "count": 4091,
+          "row_pct": 29.05
+        },
+        "lumpy virus": {
+          "count": 2945,
+          "row_pct": 20.91
+        },
+        "pneumonia": {
+          "count": 2983,
+          "row_pct": 21.18
+        }
+      },
+      "3": {
+        "anthrax": {
+          "count": 1367,
+          "row_pct": 11.24
+        },
+        "blackleg": {
+          "count": 3028,
+          "row_pct": 24.9
+        },
+        "foot and mouth": {
+          "count": 3021,
+          "row_pct": 24.85
+        },
+        "lumpy virus": {
+          "count": 2351,
+          "row_pct": 19.34
+        },
+        "pneumonia": {
+          "count": 2392,
+          "row_pct": 19.67
+        }
+      }
+    }
+  }
+}

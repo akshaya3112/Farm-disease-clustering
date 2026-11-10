@@ -330,8 +330,13 @@ function renderPcaScatter() {
     paper_bgcolor: theme.paper_bgcolor,
     plot_bgcolor: theme.plot_bgcolor,
     font: theme.font,
-    margin: { t: 45, r: 20, l: 45, b: 45 },
-    legend: { orientation: 'h', y: -0.15 }
+    margin: { t: 45, r: 25, l: 50, b: 85 },
+    legend: { 
+      orientation: 'h', 
+      y: -0.28,
+      x: 0.5,
+      xanchor: 'center'
+    }
   };
   
   if (is3D) {
@@ -382,8 +387,13 @@ function renderPcaScree() {
     paper_bgcolor: theme.paper_bgcolor,
     plot_bgcolor: theme.plot_bgcolor,
     font: theme.font,
-    margin: { t: 45, r: 50, l: 50, b: 50 },
-    legend: { orientation: 'h', y: -0.2 },
+    margin: { t: 45, r: 50, l: 50, b: 85 },
+    legend: { 
+      orientation: 'h', 
+      y: -0.28,
+      x: 0.5,
+      xanchor: 'center'
+    },
     xaxis: { gridcolor: theme.gridcolor, title: 'Principal Component' },
     yaxis: {
       title: 'Individual Variance (%)',

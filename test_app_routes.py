@@ -45,6 +45,21 @@ class TestAppRoutes(unittest.TestCase):
                 self.assertIsInstance(data, dict, f"API {url} JSON is not a dict")
                 print(f"[PASS] API {url} -> 200 OK (JSON verified)")
 
+    def test_predict_endpoint(self):
+        payload = {
+            "animal": "cow",
+            "age": 4.5,
+            "temperature": 104.2,
+            "symptoms": ["loss of appetite", "depression", "painless lumps"]
+        }
+        res = self.client.post("/api/predict", json=payload)
+        self.assertEqual(res.status_code, 200, f"/api/predict failed with {res.status_code}")
+        data = res.get_json()
+        self.assertIn("cluster_name", data)
+        self.assertIn("urgency", data)
+        self.assertIn("disease_likelihoods", data)
+        print("[PASS] API /api/predict -> 200 OK (Prediction and disease likelihood verified)")
+
     def test_figure_and_download_routes(self):
         res = self.client.get("/outputs/figures/centroid_heatmap.png")
         self.assertEqual(res.status_code, 200, "Figure serving failed")

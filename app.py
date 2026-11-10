@@ -6,6 +6,7 @@ Author: Antigravity Team
 import os
 import json
 import sys
+import math
 from flask import Flask, render_template, jsonify, request, send_from_directory, abort
 
 app = Flask(__name__)
@@ -180,6 +181,119 @@ def api_preprocessing():
     if data is None:
         return jsonify({"error": "preprocessing_log.json not found. Run pipeline first."}), 404
     return jsonify(data)
+
+
+@app.route("/api/predict", methods=["POST"])
+def api_predict():
+    """Predict disease-risk cluster profile and associated historical disease correlations for an input animal."""
+    req = request.get_json() or {}
+    animal = req.get("animal", "cow").lower().strip()
+    try:
+        age = float(req.get("age", 5.0))
+    except (ValueError, TypeError):
+        age = 5.0
+    try:
+        temperature = float(req.get("temperature", 102.2))
+    except (ValueError, TypeError):
+        temperature = 102.2
+
+    raw_symptoms = req.get("symptoms", [])
+    if isinstance(raw_symptoms, str):
+        raw_symptoms = [s.strip() for s in raw_symptoms.split(",") if s.strip()]
+    symptoms_set = {s.lower().strip() for s in raw_symptoms}
+
+    prep_log = load_json_file("preprocessing_log.json")
+    profiles_data = load_json_file("cluster_profiles.json")
+
+    if not prep_log or not profiles_data:
+        return jsonify({"error": "Pipeline outputs not found. Run pipeline first."}), 500
+
+    scaling = prep_log["scaling_stats"]
+    profiles = profiles_data["profiles"]
+    crosscheck = profiles_data.get("disease_crosscheck", {})
+    contingency = crosscheck.get("contingency_matrix", {})
+    all_symptoms = prep_log["raw_audit"]["all_symptoms"]
+
+    feature_names = list(profiles["0"]["standardized_centroids"].keys())
+
+    # 1. Feature standardization
+    vec = {}
+    vec["age_std"] = (age - scaling["Age"]["raw_mean"]) / scaling["Age"]["raw_std"]
+    vec["temp_std"] = (temperature - scaling["Temperature"]["raw_mean"]) / scaling["Temperature"]["raw_std"]
+
+    for sp in ["buffalo", "cow", "goat", "sheep"]:
+        vec[f"animal_{sp}"] = 1.0 if animal == sp else 0.0
+
+    for s in all_symptoms:
+        col = f"symptom_{s.replace(' ', '_')}"
+        vec[col] = 1.0 if s.lower() in symptoms_set else 0.0
+
+    # 2. Distance to centroids
+    dists = {}
+    for cid, p in profiles.items():
+        c_centroids = p["standardized_centroids"]
+        dist_val = math.sqrt(sum((vec[f] - c_centroids.get(f, 0.0)) ** 2 for f in feature_names))
+        dists[cid] = dist_val
+
+    best_cid = min(dists, key=dists.get)
+    matched_profile = profiles[best_cid]
+    best_dist = round(dists[best_cid], 3)
+
+    # 3. Disease distribution from historical crosscheck
+    cluster_diseases = contingency.get(best_cid, {})
+    disease_list = []
+    for d_name, d_info in cluster_diseases.items():
+        disease_list.append({
+            "disease": d_name.title(),
+            "percentage": d_info.get("row_pct", 0.0),
+            "count": d_info.get("count", 0)
+        })
+    disease_list.sort(key=lambda x: x["percentage"], reverse=True)
+
+    # 4. Clinical Triage Urgency level
+    if temperature >= 103.5 or "sweats" in symptoms_set or "shortness of breath" in symptoms_set or (disease_list and disease_list[0]["disease"].lower() == "anthrax"):
+        urgency = {
+            "level": "CRITICAL / HIGH URGENCY",
+            "badge_class": "badge-danger",
+            "color": "#dc2626",
+            "icon": "🚨",
+            "action": "Immediate quarantine of this animal. High fever or severe systemic distress detected. Notify herd veterinarian and conduct urgent diagnostic testing."
+        }
+    elif temperature >= 102.5 or any("blister" in s or "sores" in s for s in symptoms_set) or any("swelling" in s for s in symptoms_set):
+        urgency = {
+            "level": "ELEVATED RISK / PRIORITY MONITORING",
+            "badge_class": "badge-warning",
+            "color": "#d97706",
+            "icon": "⚠️",
+            "action": "Isolate in observation stall. Examine hooves, mouth, and mucosa for lesions. Monitor vitals twice daily."
+        }
+    else:
+        urgency = {
+            "level": "ROUTINE HERD OBSERVATION",
+            "badge_class": "badge-success",
+            "color": "#059669",
+            "icon": "🟢",
+            "action": "Supportive nutritional and hydration care. Monitor feed intake and rumination patterns."
+        }
+
+    return jsonify({
+        "cluster_id": int(best_cid) + 1,
+        "cluster_internal_id": best_cid,
+        "cluster_name": matched_profile["display_name"],
+        "cluster_summary": matched_profile["summary"],
+        "distance": best_dist,
+        "all_distances": {f"Cluster {int(c)+1}": round(d, 3) for c, d in dists.items()},
+        "urgency": urgency,
+        "disease_likelihoods": disease_list,
+        "animal": animal.title(),
+        "age": age,
+        "temperature": temperature,
+        "symptoms_provided": list(symptoms_set),
+        "input_normalized": {
+            "age_zscore": round(vec["age_std"], 3),
+            "temp_zscore": round(vec["temp_std"], 3)
+        }
+    })
 
 
 # -------------------------------------------------------------

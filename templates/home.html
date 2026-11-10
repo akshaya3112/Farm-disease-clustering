@@ -9,15 +9,169 @@
     <span class="badge badge-info">Veterinary Herd Health</span>
     <span class="badge badge-success">Zero Label Leakage</span>
   </div>
-  <h1 class="page-title">Farm Disease-Risk Profile Discovery</h1>
+  <h1 class="page-title">Farm Disease-Risk Profile Discovery &amp; Triage Dashboard</h1>
   <p class="page-subtitle">
     Uncovering latent clinical phenotype complexes across 43,778 livestock records through 
     unsupervised geometric clustering (Euclidean K-Means vs Manhattan K-Medians) without diagnostic label contamination.
   </p>
 </div>
 
-<!-- 1. Headline Findings (Pulled from real pipeline outputs) -->
-<h2 style="margin-bottom: 1rem;">Key Empirical Findings</h2>
+<!-- =============================================================
+     FEATURED DASHBOARD: LIVE CLINICAL TRIAGE & DISEASE PREDICTOR
+     ============================================================= -->
+<div class="predictor-dashboard" id="live-triage-dashboard">
+  <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 1rem; flex-wrap: wrap; gap: 0.5rem;">
+    <div>
+      <span class="badge badge-primary" style="margin-bottom: 0.35rem;">⚡ Interactive Diagnostic Tool</span>
+      <h2 style="margin-bottom: 0.25rem;">Live Clinical Risk Profile &amp; Disease Likelihood Predictor</h2>
+      <p style="font-size: 0.9rem; color: var(--text-muted); margin-bottom: 0;">
+        Input an animal's species, age, temperature, and presenting symptoms to evaluate its nearest syndromic risk profile and inspect empirical disease likelihoods.
+      </p>
+    </div>
+    <div>
+      <span class="badge badge-success">&#9679; Model Ready (k=4 Centroids)</span>
+    </div>
+  </div>
+
+  <!-- Quick Scenarios (1-Click Test Presets) -->
+  <div style="margin-bottom: 1.25rem; background: var(--bg-surface-alt); padding: 0.85rem 1rem; border-radius: var(--radius-md); border: 1px solid var(--border-color);">
+    <span style="font-size: 0.8rem; font-weight: 700; color: var(--text-secondary); text-transform: uppercase; letter-spacing: 0.05em; display: block; margin-bottom: 0.4rem;">
+      Quick Test Clinical Scenarios (1-Click Fill):
+    </span>
+    <div class="preset-chip-container" style="margin-bottom: 0;">
+      <button type="button" class="preset-chip" onclick="applyPreset('anthrax')">
+        🚨 <strong>Scenario 1:</strong> Acute Diaphoresis / Sweats (Sheep, 101.8&deg;F)
+      </button>
+      <button type="button" class="preset-chip" onclick="applyPreset('fever')">
+        🔥 <strong>Scenario 2:</strong> Severe Hyperthermia (Cow, 104.4&deg;F)
+      </button>
+      <button type="button" class="preset-chip" onclick="applyPreset('geriatric')">
+        🐂 <strong>Scenario 3:</strong> Senior Depressive Cattle (Buffalo, 13 yr)
+      </button>
+      <button type="button" class="preset-chip" onclick="applyPreset('locomotor')">
+        🩹 <strong>Scenario 4:</strong> Young Locomotor / Lameness (Goat, 2 yr)
+      </button>
+    </div>
+  </div>
+
+  <!-- Main Inputs Form Grid -->
+  <form id="triage-form" onsubmit="event.preventDefault(); runPrediction();">
+    <div class="grid-2" style="margin-bottom: 1.5rem;">
+      
+      <!-- Left Column: Demographics & Vitals -->
+      <div>
+        <!-- 1. Species Selection -->
+        <label class="control-label" style="display: block; margin-bottom: 0.4rem;">
+          1. Livestock Species:
+        </label>
+        <div class="species-grid">
+          <div class="species-option">
+            <input type="radio" id="sp-cow" name="species" value="cow" checked>
+            <label for="sp-cow" class="species-label">
+              <span class="species-icon">🐄</span>
+              <span>Cow</span>
+            </label>
+          </div>
+          <div class="species-option">
+            <input type="radio" id="sp-buffalo" name="species" value="buffalo">
+            <label for="sp-buffalo" class="species-label">
+              <span class="species-icon">🐃</span>
+              <span>Buffalo</span>
+            </label>
+          </div>
+          <div class="species-option">
+            <input type="radio" id="sp-goat" name="species" value="goat">
+            <label for="sp-goat" class="species-label">
+              <span class="species-icon">🐐</span>
+              <span>Goat</span>
+            </label>
+          </div>
+          <div class="species-option">
+            <input type="radio" id="sp-sheep" name="species" value="sheep">
+            <label for="sp-sheep" class="species-label">
+              <span class="species-icon">🐑</span>
+              <span>Sheep</span>
+            </label>
+          </div>
+        </div>
+
+        <!-- 2. Age Input Slider -->
+        <div class="slider-group">
+          <div class="slider-header">
+            <label for="input-age" class="control-label">2. Animal Age (Years):</label>
+            <span class="slider-val-badge" id="age-display">5.0 yrs</span>
+          </div>
+          <input type="range" id="input-age" class="range-slider" min="1" max="15" step="0.5" value="5" 
+                 oninput="updateAgeDisplay(this.value)">
+          <div style="display: flex; justify-content: space-between; font-size: 0.75rem; color: var(--text-muted); margin-top: 0.2rem;">
+            <span>1 yr (Young)</span>
+            <span>7 yrs (Median)</span>
+            <span>15 yrs (Senior)</span>
+          </div>
+        </div>
+
+        <!-- 3. Body Temperature Input Slider -->
+        <div class="slider-group">
+          <div class="slider-header">
+            <label for="input-temp" class="control-label">3. Body Temperature (&deg;F):</label>
+            <span class="slider-val-badge" id="temp-display" style="color: var(--primary);">102.2 &deg;F (Normal)</span>
+          </div>
+          <input type="range" id="input-temp" class="range-slider" min="100.0" max="105.0" step="0.1" value="102.2" 
+                 oninput="updateTempDisplay(this.value)">
+          <div style="display: flex; justify-content: space-between; font-size: 0.75rem; color: var(--text-muted); margin-top: 0.2rem;">
+            <span>100.0 &deg;F (Sub-normative)</span>
+            <span>102.2 &deg;F (Baseline)</span>
+            <span style="color: var(--danger); font-weight: 600;">105.0 &deg;F (Severe Hyperthermia)</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Right Column: Multi-Select Clinical Symptoms -->
+      <div>
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.4rem;">
+          <label class="control-label">4. Clinical Symptoms (<span id="symptoms-count">0</span> selected):</label>
+          <button type="button" class="btn btn-outline" style="padding: 0.15rem 0.5rem; font-size: 0.75rem;" onclick="clearAllSymptoms()">
+            Clear All
+          </button>
+        </div>
+        <p style="font-size: 0.8rem; color: var(--text-muted); margin-bottom: 0.5rem;">
+          Click the symptom tags below to toggle them on or off:
+        </p>
+
+        <!-- Search Symptoms Filter -->
+        <input type="text" id="symptom-search" class="form-input" placeholder="🔍 Filter symptoms..." 
+               style="width: 100%; margin-bottom: 0.5rem; font-size: 0.825rem; padding: 0.35rem 0.65rem;"
+               oninput="filterSymptomTags(this.value)">
+
+        <!-- Symptom Tag Cloud -->
+        <div class="symptom-tag-cloud" id="symptom-cloud">
+          {% if prep_log and prep_log.raw_audit and prep_log.raw_audit.all_symptoms %}
+            {% for symp in prep_log.raw_audit.all_symptoms %}
+              <div class="symptom-tag" data-symptom="{{ symp }}" onclick="toggleSymptom(this)">
+                <span>+</span> {{ symp }}
+              </div>
+            {% endfor %}
+          {% endif %}
+        </div>
+      </div>
+    </div>
+
+    <!-- Submit Button -->
+    <button type="submit" id="btn-run-prediction" class="btn btn-primary" style="width: 100%; font-size: 1.05rem; padding: 0.85rem; font-weight: 700; box-shadow: 0 4px 6px -1px rgba(37, 99, 235, 0.3);">
+      ⚡ Run Clinical Assessment &amp; Predict Disease Risk
+    </button>
+  </form>
+
+  <!-- Live Results Panel (Populated dynamically via JS) -->
+  <div id="prediction-result-container" style="display: none; margin-top: 1.5rem;">
+    <!-- Result Card injected here -->
+  </div>
+</div>
+
+<!-- =============================================================
+     1. Headline Findings (Pulled from real pipeline outputs)
+     ============================================================= -->
+<h2 style="margin-bottom: 1rem;">Key Empirical Pipeline Findings</h2>
 <div class="grid-4" style="margin-bottom: 2.5rem;">
   <div class="kpi-card">
     <span class="kpi-label">Audited Population</span>
@@ -60,7 +214,9 @@
   </div>
 </div>
 
-<!-- 2. Chosen Configuration Hero Card -->
+<!-- =============================================================
+     2. Chosen Configuration Hero Card
+     ============================================================= -->
 <div class="card" style="background: linear-gradient(135deg, var(--bg-surface), var(--primary-bg)); border-left: 5px solid var(--primary); margin-bottom: 2.5rem;">
   <div class="card-title">
     <div>
@@ -100,7 +256,9 @@
   </div>
 </div>
 
-<!-- 3. Objective Checklist Panel (Mapped to Evidence Pages) -->
+<!-- =============================================================
+     3. Objective Checklist Panel (Mapped to Evidence Pages)
+     ============================================================= -->
 <h2 style="margin-bottom: 1rem;">Core Project Objectives &amp; Evidence Mapping</h2>
 <p style="margin-bottom: 1.5rem;">
   Every objective defined in the project scope is rigorously addressed and mapped to empirical artifacts and interactive proofs:
@@ -173,11 +331,10 @@
     <div>
       <h4>Dual-Metric Distance Geometry</h4>
       <p style="font-size: 0.9rem;">
-        Standard K-Means operates in Euclidean space ($\mathbb{R}^D$). Because 24 features are binary symptom indicators, 
-        we also built a Manhattan K-Medians model where coordinates are medians, providing an honest comparison of $L_1$ vs $L_2$ geometries.
+        Standard K-Means operates in Euclidean space (&real;<sup>30</sup>). Because 24 features are binary symptom indicators, 
+        we also built a Manhattan K-Medians model where coordinates are medians, providing an honest comparison of L1 vs L2 geometries.
       </p>
     </div>
   </div>
 </div>
 {% endblock %}
-

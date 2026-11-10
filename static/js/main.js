@@ -436,3 +436,311 @@ if (document.getElementById('plotly-cluster-compare')) {
   loadProfileComparisonTool();
 }
 
+/* ===================================================================
+   6. Live Farm Triage & Disease-Risk Predictor Logic
+   =================================================================== */
+
+function updateAgeDisplay(val) {
+  const display = document.getElementById('age-display');
+  if (display) {
+    display.textContent = `${parseFloat(val).toFixed(1)} yrs`;
+  }
+}
+
+function updateTempDisplay(val) {
+  const display = document.getElementById('temp-display');
+  if (!display) return;
+  const temp = parseFloat(val);
+  
+  if (temp >= 103.5) {
+    display.textContent = `${temp.toFixed(1)} °F (Severe Fever 🔴)`;
+    display.style.color = 'var(--danger)';
+  } else if (temp >= 102.5) {
+    display.textContent = `${temp.toFixed(1)} °F (Mild Fever 🟡)`;
+    display.style.color = 'var(--warning)';
+  } else {
+    display.textContent = `${temp.toFixed(1)} °F (Normal 🟢)`;
+    display.style.color = 'var(--primary)';
+  }
+}
+
+function toggleSymptom(element) {
+  element.classList.toggle('active');
+  const span = element.querySelector('span');
+  if (span) {
+    span.textContent = element.classList.contains('active') ? '✓' : '+';
+  }
+  updateSymptomsCount();
+}
+
+function updateSymptomsCount() {
+  const countSpan = document.getElementById('symptoms-count');
+  if (countSpan) {
+    const selected = document.querySelectorAll('.symptom-tag.active');
+    countSpan.textContent = selected.length;
+  }
+}
+
+function clearAllSymptoms() {
+  document.querySelectorAll('.symptom-tag').forEach(tag => {
+    tag.classList.remove('active');
+    const span = tag.querySelector('span');
+    if (span) span.textContent = '+';
+  });
+  updateSymptomsCount();
+}
+
+function filterSymptomTags(query) {
+  const q = query.toLowerCase().trim();
+  document.querySelectorAll('.symptom-tag').forEach(tag => {
+    const symp = tag.getAttribute('data-symptom').toLowerCase();
+    tag.style.display = symp.includes(q) ? 'inline-flex' : 'none';
+  });
+}
+
+function applyPreset(presetName) {
+  clearAllSymptoms();
+  
+  const presets = {
+    'anthrax': {
+      species: 'sheep',
+      age: 5.0,
+      temperature: 101.8,
+      symptoms: ['sweats', 'fatigue', 'shortness of breath']
+    },
+    'fever': {
+      species: 'cow',
+      age: 4.0,
+      temperature: 104.4,
+      symptoms: ['loss of appetite', 'depression', 'painless lumps']
+    },
+    'geriatric': {
+      species: 'buffalo',
+      age: 13.0,
+      temperature: 102.2,
+      symptoms: ['loss of appetite', 'depression', 'difficulty walking']
+    },
+    'locomotor': {
+      species: 'goat',
+      age: 2.0,
+      temperature: 101.2,
+      symptoms: ['lameness', 'painless lumps', 'blisters on mouth']
+    }
+  };
+  
+  const p = presets[presetName];
+  if (!p) return;
+  
+  // Set species radio
+  const radio = document.querySelector(`input[name="species"][value="${p.species}"]`);
+  if (radio) radio.checked = true;
+  
+  // Set Age
+  const ageInput = document.getElementById('input-age');
+  if (ageInput) {
+    ageInput.value = p.age;
+    updateAgeDisplay(p.age);
+  }
+  
+  // Set Temp
+  const tempInput = document.getElementById('input-temp');
+  if (tempInput) {
+    tempInput.value = p.temperature;
+    updateTempDisplay(p.temperature);
+  }
+  
+  // Select Symptoms
+  document.querySelectorAll('.symptom-tag').forEach(tag => {
+    const sName = tag.getAttribute('data-symptom').toLowerCase();
+    if (p.symptoms.includes(sName)) {
+      tag.classList.add('active');
+      const span = tag.querySelector('span');
+      if (span) span.textContent = '✓';
+    }
+  });
+  
+  updateSymptomsCount();
+  
+  // Run prediction automatically for preset
+  runPrediction();
+}
+
+async function runPrediction() {
+  const submitBtn = document.getElementById('btn-run-prediction');
+  const resultContainer = document.getElementById('prediction-result-container');
+  if (!resultContainer) return;
+  
+  // 1. Gather inputs
+  const selectedSpecies = document.querySelector('input[name="species"]:checked')?.value || 'cow';
+  const age = parseFloat(document.getElementById('input-age')?.value || 5);
+  const temp = parseFloat(document.getElementById('input-temp')?.value || 102.2);
+  
+  const selectedSymptoms = [];
+  document.querySelectorAll('.symptom-tag.active').forEach(tag => {
+    selectedSymptoms.push(tag.getAttribute('data-symptom'));
+  });
+  
+  // 2. Show loading state
+  if (submitBtn) {
+    submitBtn.disabled = true;
+    submitBtn.innerHTML = '⏳ Evaluating Distance to Cluster Centroids...';
+  }
+  
+  try {
+    const res = await fetch('/api/predict', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        animal: selectedSpecies,
+        age: age,
+        temperature: temp,
+        symptoms: selectedSymptoms
+      })
+    });
+    
+    if (!res.ok) throw new Error('Prediction request failed.');
+    const data = await res.json();
+    
+    // 3. Render Rich Result Card
+    renderPredictionResult(data);
+    resultContainer.style.display = 'block';
+    resultContainer.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    
+  } catch (err) {
+    console.error('Error during prediction:', err);
+    resultContainer.innerHTML = `
+      <div class="alert alert-danger">
+        <strong>Prediction Error:</strong> Could not retrieve model prediction. Ensure the backend server is running.
+      </div>
+    `;
+    resultContainer.style.display = 'block';
+  } finally {
+    if (submitBtn) {
+      submitBtn.disabled = false;
+      submitBtn.innerHTML = '⚡ Run Clinical Assessment &amp; Predict Disease Risk';
+    }
+  }
+}
+
+function renderPredictionResult(data) {
+  const container = document.getElementById('prediction-result-container');
+  if (!container) return;
+  
+  // Disease color palette
+  const diseaseColors = {
+    'Anthrax': '#dc2626',
+    'Blackleg': '#7c3aed',
+    'Foot And Mouth': '#2563eb',
+    'Lumpy Virus': '#d97706',
+    'Pneumonia': '#059669'
+  };
+  
+  // Build disease progress bars HTML
+  let diseaseBarsHtml = '';
+  data.disease_likelihoods.forEach(d => {
+    const color = diseaseColors[d.disease] || 'var(--primary)';
+    diseaseBarsHtml += `
+      <div class="disease-bar-row">
+        <span class="disease-name-label" title="${d.disease}">${d.disease}</span>
+        <div class="disease-bar-track">
+          <div class="disease-bar-fill" style="width: ${d.percentage}%; background-color: ${color};"></div>
+        </div>
+        <span class="disease-pct-label" style="color: ${color};">${d.percentage.toFixed(1)}%</span>
+      </div>
+    `;
+  });
+  
+  // Build distance breakdown
+  let distBreakdown = Object.entries(data.all_distances).map(([k, dist]) => {
+    const isSelected = k.includes(`${data.cluster_id}`);
+    return `<span style="font-size: 0.8rem; padding: 0.2rem 0.5rem; border-radius: 4px; background: ${isSelected ? 'var(--primary-bg)' : 'var(--bg-surface-alt)'}; border: 1px solid ${isSelected ? 'var(--primary)' : 'var(--border-color)'}; font-weight: ${isSelected ? '700' : '500'}; color: ${isSelected ? 'var(--primary-light)' : 'var(--text-muted)'};">${k}: ${dist}</span>`;
+  }).join(' ');
+
+  container.innerHTML = `
+    <div class="result-card" style="border-top: 5px solid ${data.urgency.color};">
+      
+      <!-- Result Header -->
+      <div style="display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; gap: 0.75rem; border-bottom: 1px solid var(--border-color); padding-bottom: 1rem; margin-bottom: 1rem;">
+        <div>
+          <div style="display: flex; gap: 0.5rem; align-items: center; margin-bottom: 0.35rem;">
+            <span class="badge ${data.urgency.badge_class}" style="font-size: 0.85rem; padding: 0.35rem 0.75rem;">
+              ${data.urgency.icon} ${data.urgency.level}
+            </span>
+            <span class="badge badge-info">Cluster ${data.cluster_id} / 4</span>
+          </div>
+          <h3 style="margin-bottom: 0.25rem; font-size: 1.45rem;">
+            ${data.cluster_name}
+          </h3>
+          <p style="font-size: 0.9rem; color: var(--text-secondary); margin-bottom: 0;">
+            ${data.cluster_summary}
+          </p>
+        </div>
+        
+        <div style="text-align: right; background: var(--bg-surface-alt); padding: 0.6rem 0.9rem; border-radius: 8px; border: 1px solid var(--border-color);">
+          <span style="font-size: 0.75rem; color: var(--text-muted); font-weight: 600; text-transform: uppercase;">Centroid Distance</span><br>
+          <strong style="font-size: 1.3rem; color: var(--text-primary);">${data.distance}</strong>
+          <span style="font-size: 0.75rem; color: var(--text-muted); display: block;">(Best Geometric Fit)</span>
+        </div>
+      </div>
+
+      <!-- Main Result Grid -->
+      <div class="grid-2" style="margin-bottom: 1.25rem;">
+        
+        <!-- Left: Disease Likelihood Breakdown -->
+        <div>
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem;">
+            <h4 style="font-size: 1rem; margin-bottom: 0;">
+              📊 Historical Diagnostic Likelihood:
+            </h4>
+            <span style="font-size: 0.75rem; color: var(--text-muted);">Empirical Contingency</span>
+          </div>
+          <p style="font-size: 0.825rem; color: var(--text-muted); margin-bottom: 0.75rem;">
+            In the 43,778 audited herd records, animals fitting this syndromic phenotype presented with:
+          </p>
+          
+          <div class="disease-bar-container">
+            ${diseaseBarsHtml}
+          </div>
+        </div>
+
+        <!-- Right: Clinical Action Plan & Normalized Vector -->
+        <div style="display: flex; flex-direction: column; justify-content: space-between;">
+          <div>
+            <h4 style="font-size: 1rem; margin-bottom: 0.5rem;">
+              🩺 Actionable Farm Triage Recommendation:
+            </h4>
+            <div style="background: var(--bg-surface-alt); padding: 1rem; border-radius: 8px; border-left: 4px solid ${data.urgency.color}; margin-bottom: 1rem;">
+              <p style="font-size: 0.9rem; color: var(--text-primary); margin-bottom: 0; line-height: 1.5;">
+                ${data.urgency.action}
+              </p>
+            </div>
+
+            <h4 style="font-size: 0.9rem; margin-bottom: 0.35rem;">
+              📐 Distance Across All 4 Clusters:
+            </h4>
+            <div style="display: flex; gap: 0.4rem; flex-wrap: wrap; margin-bottom: 0.75rem;">
+              ${distBreakdown}
+            </div>
+          </div>
+
+          <!-- Input Snapshot -->
+          <div style="font-size: 0.8rem; color: var(--text-muted); background: var(--bg-surface-alt); padding: 0.5rem 0.75rem; border-radius: 6px;">
+            <strong>Input Summary:</strong> ${data.animal} | Age: ${data.age} yr (Z=${data.input_normalized.age_zscore}) | Temp: ${data.temperature} °F (Z=${data.input_normalized.temp_zscore}) | Symptoms: ${data.symptoms_provided.length > 0 ? data.symptoms_provided.join(', ') : 'None'}
+          </div>
+        </div>
+      </div>
+
+      <!-- Veterinary Disclaimer -->
+      <div style="background: var(--warning-bg); border: 1px solid var(--warning-border); padding: 0.65rem 0.9rem; border-radius: 6px; display: flex; gap: 0.5rem; align-items: center; font-size: 0.8rem; color: var(--warning);">
+        <span>⚠️</span>
+        <div>
+          <strong>Responsible Veterinary Notice:</strong> This prediction is generated via unsupervised phenotypic pattern clustering. 
+          It does not substitute for pathological diagnostic testing or clinical examination by a licensed veterinarian.
+        </div>
+      </div>
+
+    </div>
+  `;
+}
+
+

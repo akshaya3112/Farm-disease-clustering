@@ -1,17 +1,17 @@
 {% extends "base.html" %}
 
-{% block title %}Cluster Profiles & Interpretation - Objective 3{% endblock %}
+{% block title %}Cluster Profiles & Interpretation{% endblock %}
 
 {% block content %}
 <div class="page-header">
   <div style="display: flex; gap: 0.5rem; align-items: center; margin-bottom: 0.5rem;">
-    <span class="badge badge-success">&#10003; Objective 3 Evidence</span>
     <span class="badge badge-primary">Syndromic Phenotypes &amp; Interpretation</span>
+    <span class="badge badge-success">k = 4 Phenotypes</span>
   </div>
-  <h1 class="page-title">Objective 3: Cluster Profiles &amp; Clinical Interpretation</h1>
+  <h1 class="page-title">Cluster Profiles &amp; Clinical Interpretation</h1>
   <p class="page-subtitle">
     Exploratory phenotype profiles discovered from observational data. Cautiously named to avoid reification, 
-    supported by ANOVA feature contributions, surrogate decision trees, and descriptive cross-checks.
+    supported by ANOVA feature contributions and descriptive cross-checks.
   </p>
 </div>
 
@@ -147,81 +147,13 @@
   </div>
 </div>
 
-<!-- 4. Surrogate Decision Tree Interpretability -->
-<div class="card" style="margin-bottom: 2.5rem;">
-  <div class="card-title">
-    <h3>Surrogate Decision Tree (Cluster Explanation)</h3>
-    <span class="badge badge-success">
-      Fidelity: {% if profiles_data %}{{ profiles_data.surrogate_tree.fidelity_accuracy_pct }}%{% else %}97.8%{% endif %}
-    </span>
-  </div>
-  <p style="font-size: 0.9rem;">
-    To explain cluster assignments in human-readable rules, a shallow surrogate decision tree (depth=4) was fitted to predict 
-    the cluster label directly from the original feature matrix. The tree achieves a fidelity of 
-    <strong>{% if profiles_data %}{{ profiles_data.surrogate_tree.fidelity_accuracy_pct }}%{% else %}97.8%{% endif %}</strong>, 
-    proving the cluster boundaries are governed by clear, interpretable physiological and clinical rules:
-  </p>
 
-  <div class="grid-2">
-    <div>
-      <h4>Dominant Decision Boundaries:</h4>
-      <div class="table-responsive">
-        <table class="data-table">
-          <thead>
-            <tr>
-              <th>Feature</th>
-              <th>Tree Importance Weight</th>
-            </tr>
-          </thead>
-          <tbody>
-            {% if profiles_data and profiles_data.surrogate_tree.top_rules_features %}
-              {% for f in profiles_data.surrogate_tree.top_rules_features %}
-              <tr>
-                <td><strong>{{ f.clean_name }}</strong></td>
-                <td>
-                  <span class="badge badge-primary">{{ "{:.1f}%".format(f.importance * 100) }}</span>
-                </td>
-              </tr>
-              {% endfor %}
-            {% endif %}
-          </tbody>
-        </table>
-      </div>
-    </div>
-
-    <div style="background: var(--bg-surface-alt); padding: 1.25rem; border-radius: var(--radius-md);">
-      <h4>Interpretable Rule Heuristics:</h4>
-      <ul style="font-size: 0.875rem; line-height: 1.8; padding-left: 1.25rem; color: var(--text-secondary);">
-        <li><strong>Profile 1 Rule:</strong> Age &gt; 8.5 years &rarr; Geriatric cattle complex.</li>
-        <li><strong>Profile 2 Rule:</strong> High incidence of diaphoresis (sweats) &amp; fatigue &rarr; Acute diaphoretic group.</li>
-        <li><strong>Profile 3 Rule:</strong> Low/normal temperature (&le; 102.2 &deg;F) + younger age &rarr; Sub-febrile young stock.</li>
-        <li><strong>Profile 4 Rule:</strong> Severe hyperthermia (&gt; 103.0 &deg;F) &rarr; Acute febrile syndrome.</li>
-      </ul>
-      <p style="font-size: 0.8rem; color: var(--text-muted); margin-top: 1rem; margin-bottom: 0;">
-        <em>Note: The surrogate model is strictly an explanatory tool and must not be used as an independent classifier.</em>
-      </p>
-    </div>
-  </div>
-</div>
-
-<!-- 5. Descriptive Cross-Check with Disease Diagnoses (STRICT DISCLAIMER) -->
+<!-- 4. Descriptive Cross-Check with Disease Diagnoses -->
 <div class="card" style="border-left: 5px solid var(--warning);">
   <div class="card-title">
     <div>
       <span class="badge badge-warning" style="margin-bottom: 0.25rem;">Descriptive Audit Only</span>
       <h3 style="margin-bottom: 0;">Post-Hoc Descriptive Cross-Check with Ground-Truth Diagnoses</h3>
-    </div>
-    <span class="badge badge-danger">NEVER REPORTED AS ACCURACY</span>
-  </div>
-
-  <div class="alert alert-warning">
-    <span style="font-size: 1.5rem;">⚠️</span>
-    <div style="font-size: 0.9rem;">
-      <strong>MANDATORY METHODOLOGICAL NOTICE:</strong><br>
-      The <code>Disease</code> label was strictly excluded from feature engineering and clustering.
-      This contingency cross-check is purely a post-hoc descriptive observation to examine whether unsupervised 
-      phenotype groupings correspond to known veterinary conditions. 
-      <strong>Under no circumstances should this be interpreted or reported as diagnostic classification accuracy!</strong>
     </div>
   </div>
 
@@ -256,7 +188,7 @@
         </table>
       </div>
       <p style="font-size: 0.85rem; color: var(--text-secondary);">
-        Notice: Profile 2 captures 6,974 animals, of which 100% are Anthrax cases in the dataset (presenting with sweats, fatigue, and shortness of breath).
+        Profile 2 captures 6,974 animals, of which 100% are Anthrax cases in the dataset (presenting with sweats, fatigue, and shortness of breath).
         Conversely, Profile 3 captures Blackleg, Foot and Mouth, Lumpy Virus, and Pneumonia without Anthrax.
       </p>
     </div>

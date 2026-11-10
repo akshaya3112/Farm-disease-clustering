@@ -48,7 +48,7 @@ An end-to-end, reproducible data-science investigation and multi-page Flask web 
   - **Profile 2 (15.9%):** *Respiratory-Diaphoretic Sign Group* (Mean Temp: 101.79 &deg;F, dominant sweats 51.1%, fatigue 50.9%, shortness of breath 50.5%).
   - **Profile 3 (32.2%):** *Young Sub-Febrile Locomotor & Mucosal Pattern* (Mean Age: 4.81 yr, lower-normative temp 101.20 &deg;F, focal lumps 42.1%, lameness 22.9%).
   - **Profile 4 (27.8%):** *Acute Febrile Systemic Complex* (Severe hyperthermia: mean temp 103.84 &deg;F, high systemic fever, appetite loss 78.7%).
-- **Key Feature Contributions:** Ranked by one-way ANOVA F-statistic and explained via a shallow surrogate decision tree (fidelity: `97.8%` accuracy).
+- **Key Feature Contributions:** Ranked by one-way ANOVA F-statistic evaluating between-cluster variance against within-cluster variance.
 - **Stability Analysis:**
   - Random Seed Stability: 5 independent runs yielded a Mean Adjusted Rand Index (ARI) of `0.9957`.
   - Bootstrap Stability: 5 bootstrap subsamples (80% sampling) yielded a Mean Overlap ARI of `0.9765`.
@@ -72,7 +72,7 @@ farm-disease-clustering/
 │   ├── preprocessing.py                       # Preprocessing and auditing logic
 │   ├── clustering.py                          # KMeans & vectorized KMedians
 │   ├── evaluation.py                          # WCSS, Silhouette, DBI, PCA
-│   ├── profiling.py                           # Profiles, ANOVA, surrogate tree
+│   ├── profiling.py                           # Profiles, ANOVA ranking
 │   ├── stability.py                           # Seed, bootstrap, metric ARI
 │   └── visualization.py                       # Static PNG/SVG figure generation
 ├── outputs/

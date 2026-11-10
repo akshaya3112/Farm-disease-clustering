@@ -603,32 +603,6 @@
       "p_value": 1.1390171861488182e-51
     }
   ],
-  "surrogate_tree": {
-    "depth": 4,
-    "fidelity_accuracy_pct": 90.94,
-    "top_rules_features": [
-      {
-        "feature": "age_std",
-        "clean_name": "age (scaled)",
-        "importance": 0.3906
-      },
-      {
-        "feature": "temp_std",
-        "clean_name": "temp (scaled)",
-        "importance": 0.3406
-      },
-      {
-        "feature": "symptom_loss_of_appetite",
-        "clean_name": "loss of appetite",
-        "importance": 0.2089
-      },
-      {
-        "feature": "symptom_depression",
-        "clean_name": "depression",
-        "importance": 0.06
-      }
-    ]
-  },
   "disease_crosscheck": {
     "disclaimer": "IMPORTANT METHODOLOGICAL NOTICE: The Disease labels were NEVER used during feature engineering, distance calculation, or cluster generation. This cross-check is strictly a post-hoc descriptive investigation to observe how unsupervised clinical phenotype profiles align with veterinary diagnoses. It is NOT a measure of diagnostic classification accuracy, as clustering is an exploratory pattern discovery technique.",
     "diseases": [

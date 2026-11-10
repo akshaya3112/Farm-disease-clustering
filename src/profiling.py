@@ -6,8 +6,6 @@ Author: Antigravity Team
 import numpy as np
 import pandas as pd
 from scipy.stats import f_oneway
-from sklearn.tree import DecisionTreeClassifier
-from sklearn.metrics import accuracy_score
 
 
 def profile_clusters(df_raw, X, cluster_labels, feature_names, disease_series=None):
@@ -121,23 +119,6 @@ def profile_clusters(df_raw, X, cluster_labels, feature_names, disease_series=No
         })
     anova_df = pd.DataFrame(anova_records).sort_values(by="f_statistic", ascending=False)
     
-    # Surrogate Decision Tree (for cluster interpretability)
-    tree = DecisionTreeClassifier(max_depth=4, random_state=42)
-    tree.fit(X_df, cluster_labels)
-    tree_preds = tree.predict(X_df)
-    fidelity = float(round(accuracy_score(cluster_labels, tree_preds) * 100, 2))
-    
-    tree_importances = [
-        {
-            "feature": col,
-            "clean_name": col.replace("symptom_", "").replace("animal_", "Species: ").replace("_std", " (scaled)").replace("_", " "),
-            "importance": float(round(imp, 4))
-        }
-        for col, imp in zip(feature_names, tree.feature_importances_)
-        if imp > 0.001
-    ]
-    tree_importances = sorted(tree_importances, key=lambda x: x["importance"], reverse=True)
-    
     # Optional Descriptive Disease Cross-Check (STRICTLY NON-SUPERVISED DESCRIPTIVE LOG)
     crosscheck_data = None
     if disease_series is not None:
@@ -169,11 +150,6 @@ def profile_clusters(df_raw, X, cluster_labels, feature_names, disease_series=No
     return {
         "profiles": profiles,
         "anova_ranking": anova_df.to_dict(orient="records"),
-        "surrogate_tree": {
-            "depth": 4,
-            "fidelity_accuracy_pct": fidelity,
-            "top_rules_features": tree_importances[:10]
-        },
         "disease_crosscheck": crosscheck_data
     }
 

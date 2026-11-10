@@ -16,7 +16,7 @@ class TestAppRoutes(unittest.TestCase):
             ("/", 200, "Farm Disease-Risk Profile Discovery"),
             ("/preprocessing", 200, "Data Preparation &amp; Preprocessing"),
             ("/clustering", 200, "Clustering Workflow &amp; Distance Comparison"),
-            ("/profiles", 200, "Objective 3: Cluster Profiles"),
+            ("/profiles", 200, "Cluster Profiles &amp; Clinical Interpretation"),
             ("/stability", 200, "Stability, Limitations & Responsible Use"),
             ("/about", 200, "About &amp; Reproducibility Guide"),
         ]

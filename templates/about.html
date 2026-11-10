@@ -32,18 +32,18 @@
       </thead>
       <tbody>
         <tr>
-          <td><strong>Objective 1: Documented Preprocessing</strong></td>
+          <td><strong>Phase 1: Documented Preprocessing</strong></td>
           <td>Zero missing values confirmed; multi-hot 24-symptom representation; Z-score vital scaling; audit of 3,618 feature duplicates; auditable Decision Log.</td>
           <td><a href="{{ url_for('preprocessing') }}" class="btn btn-outline" style="padding: 0.2rem 0.6rem; font-size: 0.8rem;">/preprocessing</a></td>
         </tr>
         <tr>
-          <td><strong>Objective 2: Clustering Workflow</strong></td>
+          <td><strong>Phase 2: Clustering Workflow</strong></td>
           <td>Full grid evaluation across k=2..10 for Euclidean K-Means &amp; Manhattan K-Medians; WCSS/L1 cost, Silhouette, and DBI computed; PCA scree &amp; scatter; selection of k=4 with written trade-off justification.</td>
           <td><a href="{{ url_for('clustering') }}" class="btn btn-outline" style="padding: 0.2rem 0.6rem; font-size: 0.8rem;">/clustering</a></td>
         </tr>
         <tr>
-          <td><strong>Objective 3: Interpretation &amp; Stability</strong></td>
-          <td>4 cautious phenotype profiles; ANOVA feature ranking; surrogate tree (fidelity 97.8%); seed ARI (0.9957) &amp; bootstrap ARI (0.9765); post-hoc disease cross-check strictly labelled as descriptive.</td>
+          <td><strong>Phase 3: Interpretation &amp; Stability</strong></td>
+          <td>4 cautious phenotype profiles; ANOVA feature ranking; seed ARI (0.9957) &amp; bootstrap ARI (0.9765); post-hoc disease cross-check strictly labelled as descriptive.</td>
           <td><a href="{{ url_for('profiles') }}" class="btn btn-outline" style="padding: 0.2rem 0.6rem; font-size: 0.8rem;">/profiles</a></td>
         </tr>
         <tr>

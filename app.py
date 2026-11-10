@@ -115,18 +115,31 @@ def stability():
 @app.route("/about")
 def about():
     """About & Reproducibility: outcome mapping, pipeline execution steps, library versions, downloads."""
-    import sklearn, pandas, numpy, matplotlib, seaborn, scipy, plotly
     versions = {
         "Python": sys.version.split()[0],
-        "Flask": Flask.__version__ if hasattr(Flask, "__version__") else "3.x",
-        "scikit-learn": sklearn.__version__,
-        "pandas": pandas.__version__,
-        "numpy": numpy.__version__,
-        "matplotlib": matplotlib.__version__,
-        "seaborn": seaborn.__version__,
-        "scipy": scipy.__version__,
-        "plotly": plotly.__version__,
+        "Flask": getattr(Flask, "__version__", "3.x"),
+        "scikit-learn": "1.4.0+",
+        "pandas": "2.1.0+",
+        "numpy": "1.26.0+",
+        "matplotlib": "3.8.0+",
+        "seaborn": "0.13.0+",
+        "scipy": "1.11.0+",
+        "plotly": "5.18.0+",
     }
+    for pkg_name, mod_name in [
+        ("scikit-learn", "sklearn"),
+        ("pandas", "pandas"),
+        ("numpy", "numpy"),
+        ("matplotlib", "matplotlib"),
+        ("seaborn", "seaborn"),
+        ("scipy", "scipy"),
+        ("plotly", "plotly"),
+    ]:
+        try:
+            mod = __import__(mod_name)
+            versions[pkg_name] = getattr(mod, "__version__", "Installed")
+        except ImportError:
+            pass
     figures_list = []
     if os.path.exists(FIGURES_DIR):
         figures_list = [f for f in os.listdir(FIGURES_DIR) if f.endswith((".png", ".svg"))]

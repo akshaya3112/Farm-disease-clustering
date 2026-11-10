@@ -14,7 +14,7 @@ class TestAppRoutes(unittest.TestCase):
     def test_pages(self):
         pages = [
             ("/", 200, "Farm Disease-Risk Profile Discovery"),
-            ("/preprocessing", 200, "Objective 1: Data Preparation"),
+            ("/preprocessing", 200, "Data Preparation &amp; Preprocessing"),
             ("/clustering", 200, "Objective 2: Clustering Workflow"),
             ("/profiles", 200, "Objective 3: Cluster Profiles"),
             ("/stability", 200, "Stability, Limitations & Responsible Use"),

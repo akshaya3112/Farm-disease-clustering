@@ -1,14 +1,14 @@
 {% extends "base.html" %}
 
-{% block title %}Data & Preprocessing - Objective 1{% endblock %}
+{% block title %}Data & Preprocessing{% endblock %}
 
 {% block content %}
 <div class="page-header">
   <div style="display: flex; gap: 0.5rem; align-items: center; margin-bottom: 0.5rem;">
-    <span class="badge badge-success">&#10003; Objective 1 Evidence</span>
     <span class="badge badge-primary">Data Preparation &amp; Auditing</span>
+    <span class="badge badge-success">Quality Audited</span>
   </div>
-  <h1 class="page-title">Objective 1: Data Preparation &amp; Preprocessing</h1>
+  <h1 class="page-title">Data Preparation &amp; Preprocessing</h1>
   <p class="page-subtitle">
     Rigorous auditing of variable relevance, missing values, duplicates, biological outliers, categorical multi-hot restructuring, 
     and Z-score standardization for unsupervised distance geometry.
@@ -316,24 +316,15 @@
   </div>
 </div>
 
-<!-- 7. Preprocessing Decision Log Table (Searchable & Filterable) -->
+<!-- 7. Preprocessing Decision Log Table -->
 <div class="card">
   <div class="card-title">
     <h3>Preprocessing Decision Log</h3>
     <span class="badge badge-success">Auditable Provenance</span>
   </div>
-  <p style="font-size: 0.9rem;">
+  <p style="font-size: 0.9rem; margin-bottom: 1.25rem;">
     Full record of every transformation applied to the dataset with formal reasoning and impact analysis:
   </p>
-
-  <div class="control-panel">
-    <div class="control-group" style="flex: 1;">
-      <label for="table-search-input" class="control-label">Search Decision Log:</label>
-      <input type="text" id="table-search-input" class="form-input" 
-             placeholder="Type to filter by step, reason, or impact..." 
-             data-target-table="decision-log-table" style="width: 100%; max-width: 400px;">
-    </div>
-  </div>
 
   <div class="table-responsive">
     <table class="data-table" id="decision-log-table">

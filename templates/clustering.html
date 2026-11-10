@@ -1,14 +1,14 @@
 {% extends "base.html" %}
 
-{% block title %}Clustering Workflow - Objective 2{% endblock %}
+{% block title %}Clustering Workflow{% endblock %}
 
 {% block content %}
 <div class="page-header">
   <div style="display: flex; gap: 0.5rem; align-items: center; margin-bottom: 0.5rem;">
-    <span class="badge badge-success">&#10003; Objective 2 Evidence</span>
     <span class="badge badge-primary">Model Selection &amp; Distance Geometry</span>
+    <span class="badge badge-success">Evaluated k &in; [2, 10]</span>
   </div>
-  <h1 class="page-title">Objective 2: Clustering Workflow &amp; Distance Comparison</h1>
+  <h1 class="page-title">Clustering Workflow &amp; Distance Comparison</h1>
   <p class="page-subtitle">
     Systematic benchmarking of Euclidean K-Means against Manhattan K-Medians across cluster counts k = 2..10.
     Evaluation via WCSS / L1 Cost, Silhouette Score, Davies-Bouldin Index, and PCA decomposition.
@@ -25,21 +25,11 @@
     <span class="badge badge-success">Optimal DBI = 1.9161</span>
   </div>
   
-  <p style="font-size: 0.95rem; line-height: 1.6; margin-bottom: 1rem;">
+  <p style="font-size: 0.95rem; line-height: 1.6; margin-bottom: 0;">
     {% if metrics %}
       {{ metrics.selection_justification.written_justification }}
     {% endif %}
   </p>
-  
-  <div class="alert alert-info" style="margin-bottom: 0;">
-    <span style="font-size: 1.25rem;">⚖️</span>
-    <div>
-      <strong>Metric Disagreement &amp; Trade-off Acknowledgment:</strong><br>
-      {% if metrics %}
-        {{ metrics.selection_justification.disagreement_acknowledgment }}
-      {% endif %}
-    </div>
-  </div>
 </div>
 
 <!-- 2. Interactive Charts Control Panel -->
@@ -238,12 +228,10 @@
     </div>
 
     <div>
-      <div class="figure-container" style="margin-top: 0;">
-        <img src="{{ url_for('serve_figure', filename='pca_scree_plot.png') }}" 
-             alt="PCA Scree plot showing explained variance ratio per principal component" 
-             class="figure-img" style="max-height: 380px;">
-        <p class="figure-caption">Figure 2.1: PCA Scree Plot (Individual &amp; Cumulative Variance)</p>
-      </div>
+      <div id="plotly-pca-scree" style="width: 100%; height: 420px;"></div>
+      <p style="font-size: 0.8rem; color: var(--text-muted); text-align: center; margin-top: 0.5rem;">
+        Interactive PCA Scree Plot (Individual Bars &amp; Cumulative Line)
+      </p>
     </div>
   </div>
 

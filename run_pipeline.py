@@ -202,8 +202,8 @@ def run_pipeline():
                 "pc2": pt[1],
                 "pc3": pt[2],
                 "clusters": {
-                    f"kmeans_k{k_val}": int(kmeans_models[k_val].labels_[orig_idx]),
-                    f"kmedians_k{k_val}": int(kmedians_models[k_val].labels_[orig_idx])
+                    **{f"kmeans_k{k}": int(kmeans_models[k].labels_[orig_idx]) for k in [2, 3, 4, 5, 6]},
+                    **{f"kmedians_k{k}": int(kmedians_models[k].labels_[orig_idx]) for k in [2, 3, 4, 5, 6]}
                 }
             }
             for pt, orig_idx in zip(sampled_coords, pca_res["sample_indices"])

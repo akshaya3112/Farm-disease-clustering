@@ -110,6 +110,7 @@ async function loadClusteringCharts() {
     
     renderMetricCurves();
     renderPcaScatter();
+    renderPcaScree();
     
     // Bind controls
     const algoToggle = document.getElementById('metric-algo-select');
@@ -117,7 +118,10 @@ async function loadClusteringCharts() {
     const pcaKSelector = document.getElementById('pca-k-select');
     const pcaDimSelector = document.getElementById('pca-dim-select');
     
-    if (algoToggle) algoToggle.addEventListener('change', () => renderMetricCurves());
+    if (algoToggle) algoToggle.addEventListener('change', () => {
+      renderMetricCurves();
+      renderPcaScatter();
+    });
     if (kSelector) kSelector.addEventListener('change', () => renderMetricCurves());
     if (pcaKSelector) pcaKSelector.addEventListener('change', () => renderPcaScatter());
     if (pcaDimSelector) pcaDimSelector.addEventListener('change', () => renderPcaScatter());
@@ -125,6 +129,7 @@ async function loadClusteringCharts() {
     window.addEventListener('themeChanged', () => {
       renderMetricCurves();
       renderPcaScatter();
+      renderPcaScree();
     });
   } catch (err) {
     console.error('Failed to load clustering data for interactive charts:', err);
@@ -259,16 +264,21 @@ function renderMetricCurves() {
 }
 
 function renderPcaScatter() {
-  if (!cachedPca) return;
+  const container = document.getElementById('plotly-pca-scatter');
+  if (!container || !cachedPca || !cachedPca.sampled_points) return;
   
   const kSelector = document.getElementById('pca-k-select');
   const dimSelector = document.getElementById('pca-dim-select');
+  const algoSelect = document.getElementById('metric-algo-select');
+  
   const chosenK = kSelector ? parseInt(kSelector.value) : 4;
   const is3D = dimSelector ? dimSelector.value === '3d' : false;
+  const isMedians = algoSelect && algoSelect.value === 'kmedians';
+  const prefix = isMedians ? 'kmedians' : 'kmeans';
   
   const theme = getPlotlyThemeLayout();
   const points = cachedPca.sampled_points;
-  const clusterKey = `kmeans_k${chosenK}`;
+  const clusterKey = `${prefix}_k${chosenK}`;
   
   // Group points by cluster
   const clustersData = {};
@@ -277,24 +287,28 @@ function renderPcaScatter() {
   }
   
   points.forEach(pt => {
-    const c = pt.clusters[clusterKey];
-    if (clustersData[c]) {
+    let c = pt.clusters ? pt.clusters[clusterKey] : undefined;
+    if (c === undefined && pt.clusters) {
+      c = pt.clusters[`kmeans_k${chosenK}`] ?? 0;
+    }
+    if (c !== undefined && clustersData[c]) {
       clustersData[c].x.push(pt.pc1);
       clustersData[c].y.push(pt.pc2);
       clustersData[c].z.push(pt.pc3);
     }
   });
   
-  const colors = ['#2563eb', '#dc2626', '#059669', '#d97706', '#7c3aed', '#db2777'];
+  const colors = ['#2563eb', '#dc2626', '#059669', '#d97706', '#7c3aed', '#db2777', '#0891b2', '#ea580c'];
   const traces = [];
   
   for (let c = 0; c < chosenK; c++) {
+    const ptCount = clustersData[c].x.length;
     if (is3D) {
       traces.push({
         x: clustersData[c].x,
         y: clustersData[c].y,
         z: clustersData[c].z,
-        name: `Cluster ${c + 1}`,
+        name: `Cluster ${c + 1} (n=${ptCount})`,
         mode: 'markers',
         type: 'scatter3d',
         marker: { size: 3.5, color: colors[c % colors.length], opacity: 0.75 }
@@ -303,7 +317,7 @@ function renderPcaScatter() {
       traces.push({
         x: clustersData[c].x,
         y: clustersData[c].y,
-        name: `Cluster ${c + 1}`,
+        name: `Cluster ${c + 1} (n=${ptCount})`,
         mode: 'markers',
         type: 'scatter',
         marker: { size: 5, color: colors[c % colors.length], opacity: 0.7 }
@@ -312,11 +326,11 @@ function renderPcaScatter() {
   }
   
   const layout = {
-    title: `PCA Projection of Clusters (${is3D ? '3D' : '2D'}, k=${chosenK})`,
+    title: `PCA Cluster Projection (${is3D ? '3D' : '2D'}, ${isMedians ? 'Manhattan K-Medians' : 'Euclidean K-Means'}, k=${chosenK})`,
     paper_bgcolor: theme.paper_bgcolor,
     plot_bgcolor: theme.plot_bgcolor,
     font: theme.font,
-    margin: { t: 40, r: 20, l: 40, b: 40 },
+    margin: { t: 45, r: 20, l: 45, b: 45 },
     legend: { orientation: 'h', y: -0.15 }
   };
   
@@ -332,6 +346,60 @@ function renderPcaScatter() {
   }
   
   Plotly.react('plotly-pca-scatter', traces, layout, { responsive: true, displayModeBar: false });
+}
+
+function renderPcaScree() {
+  const container = document.getElementById('plotly-pca-scree');
+  if (!container || !cachedPca || !cachedPca.scree_data) return;
+
+  const theme = getPlotlyThemeLayout();
+  const scree = cachedPca.scree_data.slice(0, 15);
+
+  const traceBars = {
+    x: scree.map(d => `PC${d.component}`),
+    y: scree.map(d => d.pct_explained),
+    name: 'Individual Variance (%)',
+    type: 'bar',
+    marker: { color: '#2563eb', opacity: 0.8 },
+    yaxis: 'y1',
+    hovertemplate: '%{x}: %{y:.2f}% variance<extra></extra>'
+  };
+
+  const traceLine = {
+    x: scree.map(d => `PC${d.component}`),
+    y: scree.map(d => d.pct_cumulative),
+    name: 'Cumulative Variance (%)',
+    type: 'scatter',
+    mode: 'lines+markers',
+    marker: { color: '#dc2626', size: 6 },
+    line: { color: '#dc2626', width: 2.5 },
+    yaxis: 'y2',
+    hovertemplate: 'Cumulative: %{y:.2f}%<extra></extra>'
+  };
+
+  const layout = {
+    title: 'PCA Scree Plot (Explained Variance)',
+    paper_bgcolor: theme.paper_bgcolor,
+    plot_bgcolor: theme.plot_bgcolor,
+    font: theme.font,
+    margin: { t: 45, r: 50, l: 50, b: 50 },
+    legend: { orientation: 'h', y: -0.2 },
+    xaxis: { gridcolor: theme.gridcolor, title: 'Principal Component' },
+    yaxis: {
+      title: 'Individual Variance (%)',
+      gridcolor: theme.gridcolor,
+      side: 'left'
+    },
+    yaxis2: {
+      title: 'Cumulative (%)',
+      overlaying: 'y',
+      side: 'right',
+      range: [0, 105],
+      showgrid: false
+    }
+  };
+
+  Plotly.react('plotly-pca-scree', [traceBars, traceLine], layout, { responsive: true, displayModeBar: false });
 }
 
 /* ===================================================================

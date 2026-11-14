@@ -1,167 +1,232 @@
 # Farm Disease-Risk Profile Discovery Through Unsupervised Pattern Clustering
 
-An end-to-end, reproducible data-science investigation and multi-page Flask web application uncovering latent livestock syndromic risk phenotypes from observational herd data without diagnostic label contamination.
+Unsupervised machine learning project that discovers groups of livestock with similar disease-risk profiles **without using the disease labels**. It compares Euclidean K-Means and Manhattan K-Medians, validates the results, interprets the clusters, and serves everything through an interactive web dashboard.
+
+- **Live dashboard:** https://farm-disease-clustering.vercel.app/
+- **Course:** INT396 (Unsupervised Machine Learning), Lovely Professional University
+- **Author:** Akshaya (individual project)
 
 ---
 
-## 📌 Project Overview
-- **Title:** Farm Disease-Risk Profile Discovery Through Unsupervised Pattern Clustering
-- **Dataset:** Kaggle "Animal Disease Prediction" (`43,778` animal records, `7` attributes)
-- **Methodology:** Unsupervised Pattern Discovery (Euclidean K-Means vs Manhattan K-Medians)
-- **Primary Selected Configuration:** Euclidean K-Means, $k = 4$ (Davies-Bouldin Index: `1.9161`, Silhouette Score: `0.1405`)
-- **Web Application:** Multi-page Flask app with Jinja2 templates, REST APIs, and interactive Plotly visualizations.
+## Table of Contents
+
+1. [Project Overview](#project-overview)
+2. [Key Results](#key-results)
+3. [Dataset](#dataset)
+4. [Methodology](#methodology)
+5. [Prerequisites](#prerequisites)
+6. [Dependencies](#dependencies)
+7. [Installation](#installation)
+8. [Execution Instructions](#execution-instructions)
+9. [Project Structure](#project-structure)
+10. [Reproducibility](#reproducibility)
+11. [Limitations](#limitations)
+12. [Responsible Use](#responsible-use)
+13. [References](#references)
 
 ---
 
-## 🎯 Objectives & Implementation
+## Project Overview
 
-### Objective 1: Data Preparation & Auditing
-- **Dataset Ingestion:** 43,778 animal records across 4 species (`cow`, `buffalo`, `goat`, `sheep`).
-- **Zero Missing Cells:** Audited missing values across all columns (0 missing values, complete observations).
-- **Outlier Audit:** Evaluated IQR thresholds for continuous vitals:
-  - Age: Q1=4, Q3=10, IQR=6 &rarr; Bounds: [-5.0, 19.0] yr &rarr; Observed [1.0, 15.0] yr (0 outliers).
-  - Temperature: Q1=101.1, Q3=103.4, IQR=2.3 &rarr; Bounds: [97.65, 106.85] &deg;F &rarr; Observed [100.0, 105.0] &deg;F (0 outliers).
-- **Duplicate Audit:** 0 exact duplicate rows across all 7 columns; 3,618 feature-level duplicates across the 6 predictor fields. Retained after verifying that multiple animals naturally present identical common symptom triplets in agricultural herds.
-- **Categorical Multi-Hot Reshaping:** Positional symptom slots (`Symptom 1`, `Symptom 2`, `Symptom 3`) were unified into a 24-dimensional binary multi-hot feature space ($x_j \in \{0, 1\}$).
-- **Why Label Encoding is Flawed:** Label encoding assigns arbitrary ordinal integers (e.g. Buffalo=0, Cow=1, Goat=2, Sheep=3). In Euclidean and Manhattan distance, $(Sheep - Buffalo)^2 = 9$ vs $(Cow - Buffalo)^2 = 1$, imposing an artificial metric hierarchy. One-hot and multi-hot binary indicators place each category on an orthogonal axis at equidistant unit distance.
-- **Standardization:** `StandardScaler` applied to `Age` and `Temperature` ($\mu=0, \sigma=1$); binary flags left in $\{0, 1\}$ to maintain exact Hamming distance semantics.
-- **Auditable Preprocessing Decision Log:** Saved to `outputs/preprocessing_log.json` and rendered in a searchable table.
+Livestock diseases often share overlapping symptoms, and confirmed diagnoses are costly or missing on real farms. This project asks: *can animals be grouped into meaningful risk profiles from symptoms, species, age and temperature alone?*
 
-### Objective 2: Clustering Workflow
-- **Euclidean K-Means Grid:** Evaluated for $k \in [2, 10]$ (`scikit-learn`, `n_init=10`, `random_state=42`).
-- **Manhattan K-Medians Grid:** Implemented a custom, vectorized $L_1$ coordinate-wise K-Medians algorithm for $k \in [2, 10]$. Standard K-Means does not support Manhattan distance because taking the arithmetic mean minimizes squared Euclidean errors; in $L_1$ space, the mathematical minimizer is the univariate median.
-- **Validation Metrics Computed:**
-  - WCSS (Inertia for Euclidean, total $L_1$ distance for Manhattan)
-  - Silhouette Score (computed with metric="euclidean" for K-Means, metric="manhattan" for K-Medians)
-  - Davies-Bouldin Index (DBI)
-- **PCA Decomposition:** Scree plot, explained variance ratios, and 2D/3D scatter projections.
-- **Selected Configuration ($k = 4$):**
-  - Minimal Davies-Bouldin Index globally across all tested configurations (`DBI = 1.9161`).
-  - Strong Silhouette Score (`0.1405`).
-  - Clear WCSS elbow inflection point.
-  - Peaks under Manhattan K-Medians (`Silhouette = 0.2042`).
-  - Clinically resolves 4 interpretable syndromic phenotypes without collapsing into over-simplistic binary splits.
+The workflow:
 
-### Objective 3: Interpretation & Responsible Reporting
-- **Discovered Syndromic Phenotypes:**
-  - **Profile 1 (24.1%):** *Geriatric Bovine Clinical Syndrome* (Mean Age: 11.93 yr, 86.7% cow/buffalo, dominant loss of appetite 75.7% and depression 51.2%).
-  - **Profile 2 (15.9%):** *Respiratory-Diaphoretic Sign Group* (Mean Temp: 101.79 &deg;F, dominant sweats 51.1%, fatigue 50.9%, shortness of breath 50.5%).
-  - **Profile 3 (32.2%):** *Young Sub-Febrile Locomotor & Mucosal Pattern* (Mean Age: 4.81 yr, lower-normative temp 101.20 &deg;F, focal lumps 42.1%, lameness 22.9%).
-  - **Profile 4 (27.8%):** *Acute Febrile Systemic Complex* (Severe hyperthermia: mean temp 103.84 &deg;F, high systemic fever, appetite loss 78.7%).
-- **Key Feature Contributions:** Ranked by one-way ANOVA F-statistic evaluating between-cluster variance against within-cluster variance.
-- **Stability Analysis:**
-  - Random Seed Stability: 5 independent runs yielded a Mean Adjusted Rand Index (ARI) of `0.9957`.
-  - Bootstrap Stability: 5 bootstrap subsamples (80% sampling) yielded a Mean Overlap ARI of `0.9765`.
-  - Metric Concordance: Euclidean vs Manhattan ARI at $k=4$ is `0.1775`, reflecting differing geometric handling of sparse binary features.
-- **Post-Hoc Descriptive Cross-Check:** The ground-truth `Disease` label was strictly isolated prior to clustering. A post-hoc contingency table reveals that Profile 2 captures 6,974 animals, all of which are Anthrax cases in the dataset. This is documented strictly as a descriptive cross-check and never reported as classification accuracy.
-- **Responsible Use & Limitations:** Documented that exploratory clusters are phenotype groupings, not diagnostic disease categories. Requires veterinary expert validation; not for automated treatment or culling decisions.
+1. Audit and preprocess the data (the `Disease` column is isolated before any scaling, encoding or distance computation).
+2. Cluster with **Euclidean K-Means** and **Manhattan K-Medians** for k = 2 to 10.
+3. Validate with **WCSS (elbow), Silhouette Score and Davies-Bouldin Index**, and visualise separation with **PCA**.
+4. Interpret the clusters (profiles, standardised centroids, ANOVA feature ranking).
+5. Test stability (random seeds, bootstrap resamples, neighbouring k, distance metric).
+6. Cross-check against the disease labels **after** clustering, for description only.
+7. Present everything in a Flask and Plotly dashboard, including a tool that places a new animal into its nearest risk profile.
 
----
+## Key Results
 
-## 📂 Project Directory Structure
+| Item | Value |
+|---|---|
+| Selected configuration | K-Means, Euclidean distance, **k = 4** |
+| WCSS / inertia | 144,176.66 |
+| Silhouette Score | 0.1405 |
+| Davies-Bouldin Index | 1.9161 (global minimum over k = 2 to 10) |
+| Seed stability (mean ARI, 5 seeds) | 0.9957 |
+| Bootstrap stability (mean ARI) | 0.9765 |
+| ARI, Euclidean vs Manhattan (k = 4) | 0.1775 |
+| Top 3 PCA components | 55.12% of variance |
 
-```text
-farm-disease-clustering/
-├── data/
-│   ├── animal_disease_dataset.csv             # Raw Kaggle dataset
-│   └── processed_features.csv                 # Preprocessed 30-dim matrix
-├── notebooks/
-│   └── farm_disease_clustering_analysis.ipynb # Well-commented Jupyter notebook
-├── src/
-│   ├── __init__.py
-│   ├── preprocessing.py                       # Preprocessing and auditing logic
-│   ├── clustering.py                          # KMeans & vectorized KMedians
-│   ├── evaluation.py                          # WCSS, Silhouette, DBI, PCA
-│   ├── profiling.py                           # Profiles, ANOVA ranking
-│   ├── stability.py                           # Seed, bootstrap, metric ARI
-│   └── visualization.py                       # Static PNG/SVG figure generation
-├── outputs/
-│   ├── metrics.json                           # Metrics across k=2..10
-│   ├── cluster_profiles.json                  # Phenotypes, traits, centroids
-│   ├── stability.json                         # ARI matrices & stability verdict
-│   ├── preprocessing_log.json                 # Decision log & audits
-│   ├── pca.json                               # Scree data & sample coordinates
-│   └── figures/                               # PNG & SVG publication plots
-├── templates/                                 # Jinja2 templates (Multi-page app)
-│   ├── base.html                              # Base layout with theme toggle
-│   ├── home.html                              # Headline findings & checklist
-│   ├── preprocessing.html                     # Objective 1 page
-│   ├── clustering.html                        # Objective 2 page
-│   ├── profiles.html                          # Objective 3 page & comparison tool
-│   ├── stability.html                         # Stability & ethics page
-│   └── about.html                             # Outcome mapping & downloads
-├── static/
-│   ├── css/style.css                          # Custom responsive design system
-│   └── js/main.js                             # Plotly charts, search, theme toggle
-├── app.py                                     # Flask application and REST API
-├── run_pipeline.py                            # One-command Phase A orchestrator
-├── run_all.bat                                # Windows launcher
-├── run_all.sh                                 # POSIX launcher
-├── test_app_routes.py                         # Automated test suite
-├── requirements.txt                           # Dependency specifications
-└── README.md                                  # Documentation
-```
+**Discovered profiles (k = 4):**
 
----
+| Profile | Animals | Mean age | Mean temp |
+|---|---|---|---|
+| Geriatric Bovine Clinical Syndrome | 10,564 (24.13%) | 11.93 yrs | 102.2 °F |
+| Respiratory-Diaphoretic Sign Group | 6,974 (15.93%) | 5.62 yrs | 101.79 °F |
+| Young Sub-Febrile Locomotor and Mucosal Pattern | 14,081 (32.16%) | 4.81 yrs | 101.2 °F |
+| Acute Febrile Systemic Complex | 12,159 (27.77%) | 5.22 yrs | 103.84 °F |
 
-## 🚀 Reproduction Instructions
+The Silhouette Score is modest, so clusters overlap. See [Limitations](#limitations).
 
-### 1. Environment Setup
-Install all required dependencies:
+## Dataset
+
+- **Source:** Kaggle livestock symptoms and diseases ("Animal Disease Prediction") dataset
+- **File:** `animal_disease_dataset.csv`
+- **Size:** 43,778 rows, 7 columns, no missing values
+
+| Column | Description |
+|---|---|
+| `Animal` | cow, buffalo, goat or sheep |
+| `Age` | age in years (1 to 15) |
+| `Temperature` | body temperature in °F (about 100 to 105) |
+| `Symptom 1`, `Symptom 2`, `Symptom 3` | three symptom slots, 24 distinct symptoms |
+| `Disease` | anthrax, blackleg, foot and mouth, lumpy virus, pneumonia (**not used for clustering**) |
+
+Dataset link: *[add your Google Drive or Kaggle link here]*
+
+## Methodology
+
+**Preprocessing**
+- Isolate `Disease` before any transformation.
+- Multi-hot encode the 24 symptoms (removes bias from the three symptom slots).
+- One-hot encode the 4 species.
+- Standardise `Age` and `Temperature`.
+- Final feature space: **30 features** (2 vitals + 4 species + 24 symptoms).
+
+**Clustering**
+- Euclidean K-Means (`n_init >= 10`).
+- Manhattan K-Medians (custom implementation, because scikit-learn's `KMeans` is Euclidean only).
+- k = 2 to 10, evaluated with WCSS, Silhouette Score and Davies-Bouldin Index.
+
+**Interpretation and stability**
+- 2D and 3D PCA, standardised centroid heatmap, ANOVA F-statistic feature ranking.
+- 5 random seeds (42, 123, 456, 789, 999), 5 bootstrap subsamples (80%), k vs k+1 comparison, Euclidean vs Manhattan comparison.
+
+## Prerequisites
+
+- **Python 3.9 or newer** (developed and tested on Python 3.12)
+- **pip** (Python package manager)
+- **Git** (to clone the repository)
+- A modern web browser (to view the dashboard)
+- About 500 MB of free disk space
+
+Check your versions:
+
 ```bash
-pip install -r requirements.txt
+python --version
+git --version
 ```
 
-### 2. Run the Complete Data Science Pipeline (Phase A)
-Execute the master pipeline orchestrator to regenerate all metrics, profiles, stability audits, and static figures:
+## Dependencies
+
+| Package | Purpose |
+|---|---|
+| pandas, numpy | data handling |
+| scikit-learn | K-Means, metrics, PCA, preprocessing |
+| scipy | hierarchical clustering, statistics |
+| matplotlib, seaborn | static figures |
+| plotly | interactive charts |
+| flask (3.1) | web dashboard |
+| jupyter | notebook execution |
+
+All dependencies are listed in `requirements.txt`.
+
+## Installation
+
 ```bash
-python run_pipeline.py
+# 1. Clone the repository
+git clone https://github.com/akshaya3112/Farm-disease-clustering.git
+cd Farm-disease-clustering
+
+# 2. (Recommended) create and activate a virtual environment
+python -m venv venv
+
+# Windows (PowerShell)
+venv\Scripts\Activate.ps1
+# macOS / Linux
+source venv/bin/activate
+
+# 3. Install dependencies
+python -m pip install --upgrade pip
+python -m pip install -r requirements.txt
 ```
 
-### 3. Launch the Multi-Page Flask Web Application (Phase B)
-Start the web dashboard:
+> **Windows tip:** use `python -m pip` instead of `pip`. It avoids launcher errors when several Python versions are installed.
+
+Verify the installation:
+
+```bash
+python -c "import pandas, numpy, sklearn, scipy, matplotlib, seaborn, plotly, flask; print('all good')"
+```
+
+Make sure `animal_disease_dataset.csv` is in the project folder (or the data folder used by the code).
+
+## Execution Instructions
+
+### Option 1: Run the analysis notebook
+
+```bash
+jupyter notebook project.ipynb
+```
+
+Then choose **Kernel > Restart and Run All**. The notebook runs top to bottom: data audit, preprocessing, K-Means and K-Medians for k = 2 to 10, validation metrics, PCA, profiling, and stability analysis. Figures are saved to `outputs/figures/` and tables to `outputs/`.
+
+### Option 2: Run the dashboard locally
+
 ```bash
 python app.py
 ```
-Open your browser and navigate to:
-**http://127.0.0.1:5000**
 
-### 4. One-Click Runners
-- **Windows:** Run `.\run_all.bat`
-- **Linux / macOS:** Run `bash run_all.sh`
+Open the address shown in the terminal (usually `http://127.0.0.1:5000`).
 
-### 5. Automated Testing
-Run the route and API verification test suite:
-```bash
-python test_app_routes.py
+Dashboard pages: Home (with the interactive risk-profile predictor), Data and Preprocessing, Clustering Workflow, Cluster Profiles, Stability and Ethics, About and Reproduce.
+
+### Option 3: Use the live deployment
+
+No installation needed: https://farm-disease-clustering.vercel.app/
+
+## Project Structure
+
+> Update this tree to match your repository.
+
+```
+Farm-disease-clustering/
+├── animal_disease_dataset.csv   # dataset
+├── project.ipynb                # full analysis notebook
+├── app.py                       # Flask dashboard
+├── requirements.txt             # dependencies
+├── outputs/
+│   └── figures/                 # generated plots (heatmaps, ANOVA, stability)
+└── README.md
 ```
 
----
+## Reproducibility
 
-## 📊 Summary of Chosen Configuration & Justification
+- Fixed random seeds (primary seed 42) throughout.
+- `n_init >= 10` restarts for K-Means.
+- Stability audited across 5 seeds and 5 bootstrap subsamples.
+- Slow computations (such as plots) use documented random samples of the full data, where noted in the notebook.
 
-| Parameter | Selected Value |
-|---|---|
-| **Algorithm** | K-Means |
-| **Distance Metric** | Euclidean ($L_2$ norm) |
-| **Number of Clusters ($k$)** | $k = 4$ |
-| **WCSS / Inertia** | `144,176.66` |
-| **Silhouette Score** | `0.1405` |
-| **Davies-Bouldin Index** | `1.9161` (Global Minimum across all tested $k$) |
-| **Seed Stability (Mean ARI)** | `0.9957` (Near-perfect convergence) |
-| **Bootstrap Overlap ARI** | `0.9765` |
+## Limitations
 
-**Selection Rationale:**
-1. **Mathematical Optimization:** The Davies-Bouldin Index strictly achieves its global minimum at $k = 4$ (`1.9161`), indicating maximal ratio of cluster separation to within-cluster dispersion.
-2. **Elbow Inflection:** The rate of WCSS reduction exhibits a clear elbow inflection at $k = 4$, with marginal returns rapidly diminishing for $k \ge 5$.
-3. **Cross-Metric Concordance:** Under the Manhattan K-Medians model, Silhouette Score peaks at $k = 4$ (`0.2042`), demonstrating cross-metric agreement.
-4. **Clinical Granularity:** While $k = 2$ achieved a slightly higher Euclidean silhouette score (`0.1425` vs `0.1405`), $k = 2$ had a poor Davies-Bouldin index (`2.3101`) and merely split animals into young vs old, failing to resolve the distinct symptom complexes needed for actionable herd risk management.
+- Dataset origin, sampling method and farm geography are unknown; the fixed three symptom slots suggest a collection artifact rather than real veterinary records.
+- K-Means assumes continuous, roughly spherical clusters, while most features here are binary.
+- Silhouette Score is low (0.14), so cluster separation is modest and clusters overlap.
+- Euclidean and Manhattan solutions disagree (ARI 0.1775 at k = 4).
+- Validation metrics measure geometry, not veterinary validity.
+- Only 5 diseases and 4 species are represented.
 
----
+## Responsible Use
 
-## 🔍 Dataset Quirks & Assumptions
+- Clusters are **exploratory phenotypes**, not permanent real-world disease categories.
+- They are **not a diagnostic tool**; any flagged profile must be validated by a licensed veterinarian.
+- Cluster membership must **never** be used to automate treatment, quarantine or culling decisions.
+- Intended only for herd-level surveillance and triage prioritisation.
 
-1. **Fixed Triplet Symptom Structure:** Every animal in the dataset possesses exactly three recorded symptoms across `Symptom 1`, `Symptom 2`, and `Symptom 3`. In field veterinary practice, animal symptom counts vary widely. Multi-hot encoding across all 24 unique symptoms successfully removed the positional slot bias.
-2. **Feature Duplicates (3,618 rows):** While no row was an exact duplicate across all 7 columns, 3,618 animals shared identical feature vectors (excluding `Disease`). In veterinary epidemiology, identical symptom profiles naturally occur within herds. Dropping these records would distort natural cluster density and disease prevalence.
-3. **Synthetic / Curated Origins:** The dataset originated from Kaggle with clean, discrete integer ages (1-15) and narrow temperatures (100.0-105.0 &deg;F). Consequently, findings are presented cautiously as exploratory phenotypes rather than definitive real-world disease classifications.
+## References
 
+- Pedregosa et al., *Scikit-learn: Machine Learning in Python*, JMLR, 2011.
+- MacQueen, *Some methods for classification and analysis of multivariate observations*, 1967.
+- Rousseeuw, *Silhouettes: a graphical aid to the interpretation and validation of cluster analysis*, 1987.
+- Davies and Bouldin, *A cluster separation measure*, IEEE TPAMI, 1979.
+
+## Author
+
+**Akshaya**, B.Tech Computer Science and Engineering (AI/ML), Lovely Professional University
+GitHub: [akshaya3112](https://github.com/akshaya3112)

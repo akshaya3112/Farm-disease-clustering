@@ -15,6 +15,41 @@
   </p>
 </div>
 
+<!-- 0. Plain-English Field Guide for Non-Technical Users & Farmers -->
+<div class="card" style="border-left: 5px solid var(--primary); background: linear-gradient(135deg, rgba(16, 185, 129, 0.08), rgba(6, 95, 70, 0.03)); margin-bottom: 2rem;">
+  <div class="card-title">
+    <div>
+      <span class="badge badge-success" style="margin-bottom: 0.35rem;">💡 Easy Field Guide</span>
+      <h3 style="margin-bottom: 0;">How the Computer Discovered 4 Health Groups</h3>
+    </div>
+  </div>
+  <p style="font-size: 0.95rem; line-height: 1.6; color: var(--text-secondary); margin-bottom: 1.25rem;">
+    Imagine having 43,778 sick animals in one yard. An experienced veterinarian would sort them into a few distinct treatment pens 
+    rather than treating all 43,000 as separate cases. Our machine learning system tested <strong>18 different ways</strong> to group them 
+    and proved that <strong>exactly 4 groups (k = 4)</strong> gives the cleanest, safest, and most practical separation.
+  </p>
+  <div class="grid-3" style="gap: 1rem;">
+    <div style="background: var(--bg-surface); padding: 1rem; border-radius: 8px; border: 1px solid var(--border-color);">
+      <div style="font-size: 1.25rem; margin-bottom: 0.25rem;">🔍 1. Tested 2 to 10 Groups</div>
+      <p style="font-size: 0.85rem; color: var(--text-muted); margin: 0;">
+        Too few groups (e.g. 2) lumped mild coughs with deadly fevers. Too many (e.g. 10) made useless micro-subgroups that confused farm staff.
+      </p>
+    </div>
+    <div style="background: var(--bg-surface); padding: 1rem; border-radius: 8px; border: 1px solid var(--border-color);">
+      <div style="font-size: 1.25rem; margin-bottom: 0.25rem;">📐 2. Compared Distance Math</div>
+      <p style="font-size: 0.85rem; color: var(--text-muted); margin: 0;">
+        We compared <strong>Euclidean distance</strong> (measuring straight-line physical separation) against <strong>Manhattan distance</strong> (counting symptom checkmarks).
+      </p>
+    </div>
+    <div style="background: var(--bg-surface); padding: 1rem; border-radius: 8px; border: 1px solid var(--border-color);">
+      <div style="font-size: 1.25rem; margin-bottom: 0.25rem;">🏆 3. Why k = 4 Won</div>
+      <p style="font-size: 0.85rem; color: var(--text-muted); margin: 0;">
+        The Davies-Bouldin index reached its <strong>global best score (1.9161)</strong> at 4 groups, meaning the groups are tightly clustered inside and widely separated from each other.
+      </p>
+    </div>
+  </div>
+</div>
+
 <!-- 1. Primary Selected Configuration Hero Box -->
 <div class="card" style="border-left: 5px solid var(--primary); background: var(--bg-surface-alt); margin-bottom: 2rem;">
   <div class="card-title">

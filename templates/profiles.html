@@ -1,12 +1,13 @@
 {% extends "base.html" %}
 
-{% block title %}Cluster Profiles & Interpretation{% endblock %}
+{% block title %}Cluster Profiles &amp; Clinical Interpretation{% endblock %}
 
 {% block content %}
 <div class="page-header">
-  <div style="display: flex; gap: 0.5rem; align-items: center; margin-bottom: 0.5rem;">
+  <div style="display: flex; gap: 0.5rem; align-items: center; margin-bottom: 0.5rem; flex-wrap: wrap;">
     <span class="badge badge-primary">Syndromic Phenotypes &amp; Interpretation</span>
     <span class="badge badge-success">k = 4 Phenotypes</span>
+    <span class="badge badge-info">Zero Label Leakage</span>
   </div>
   <h1 class="page-title">Cluster Profiles &amp; Clinical Interpretation</h1>
   <p class="page-subtitle">
@@ -15,54 +16,75 @@
   </p>
 </div>
 
+<!-- Plain-English Farmer & Field Guide Banner -->
+<div class="card" style="background: linear-gradient(135deg, var(--bg-surface), var(--primary-bg)); border-left: 5px solid var(--primary); margin-bottom: 2rem;">
+  <div style="display: flex; gap: 1rem; align-items: flex-start;">
+    <span style="font-size: 2rem;">💡</span>
+    <div>
+      <h3 style="margin-bottom: 0.35rem;">What Are Herd Risk Profiles? (Field Guide)</h3>
+      <p style="font-size: 0.925rem; color: var(--text-secondary); line-height: 1.6; margin-bottom: 0;">
+        Instead of guessing from isolated symptoms, unsupervised machine learning evaluated all 43,778 animals 
+        across age, body temperature, and 24 clinical signs. It naturally discovered <strong>4 core health patterns</strong>. 
+        Knowing which pattern your animal fits helps you determine immediate isolation protocols, nutrition changes, or when to call the veterinarian.
+      </p>
+    </div>
+  </div>
+</div>
+
 <!-- 1. Cluster Profiles Grid (One Card per Discovered Cluster) -->
-<h2 style="margin-bottom: 1rem;">Discovered Herd Risk Profiles (k = 4)</h2>
-<div class="grid-2" style="margin-bottom: 2.5rem;">
+<h2 style="margin-bottom: 1.25rem;">Discovered Herd Risk Profiles (k = 4)</h2>
+<div class="grid-2" style="margin-bottom: 2.75rem;">
   {% if profiles_data and profiles_data.profiles %}
     {% for cid, prof in profiles_data.profiles.items() %}
-    <div class="card" style="border-top: 4px solid {% if loop.index == 1 %}#2563eb{% elif loop.index == 2 %}#dc2626{% elif loop.index == 3 %}#059669{% else %}#d97706{% endif %};">
+    {% set prof_num = loop.index %}
+    <div class="card" style="border-top: 5px solid {% if loop.index == 1 %}#2563eb{% elif loop.index == 2 %}#dc2626{% elif loop.index == 3 %}#059669{% else %}#d97706{% endif %}; margin-bottom: 0;">
       <div class="card-title">
         <div>
-          <span class="badge badge-primary" style="margin-bottom: 0.25rem;">Cluster {{ loop.index }}</span>
-          <h3 style="margin-bottom: 0;">{{ prof.display_name }}</h3>
+          <span class="badge {% if loop.index == 1 %}badge-primary{% elif loop.index == 2 %}badge-danger{% elif loop.index == 3 %}badge-success{% else %}badge-warning{% endif %}" style="margin-bottom: 0.35rem;">
+            Cluster {{ loop.index }} of 4
+          </span>
+          <h3 style="margin-bottom: 0; font-size: 1.25rem;">
+            {% if loop.index == 1 %}🐂{% elif loop.index == 2 %}🚨{% elif loop.index == 3 %}🐐{% else %}🔥{% endif %}
+            {{ prof.display_name }}
+          </h3>
         </div>
         <div style="text-align: right;">
-          <strong style="font-size: 1.25rem; color: var(--text-primary);">{{ "{:,}".format(prof.sample_count) }}</strong><br>
+          <strong style="font-size: 1.35rem; color: var(--text-primary); font-family: var(--font-heading);">{{ "{:,}".format(prof.sample_count) }}</strong><br>
           <span class="badge badge-info">{{ prof.percentage }}% of herd</span>
         </div>
       </div>
 
-      <p style="font-size: 0.9rem; line-height: 1.5; color: var(--text-secondary); margin-bottom: 1rem;">
+      <p style="font-size: 0.9rem; line-height: 1.6; color: var(--text-secondary); margin-bottom: 1rem;">
         {{ prof.summary }}
       </p>
 
       <!-- Key Demographic Traits -->
-      <div style="display: flex; gap: 1.25rem; background: var(--bg-surface-alt); padding: 0.75rem 1rem; border-radius: 6px; margin-bottom: 1rem;">
+      <div style="display: flex; gap: 1rem; background: var(--bg-surface-alt); padding: 0.85rem 1rem; border-radius: var(--radius-md); margin-bottom: 1rem; flex-wrap: wrap;">
         <div>
-          <span style="font-size: 0.775rem; color: var(--text-muted); font-weight: 600;">MEAN AGE</span><br>
-          <strong style="font-size: 1.05rem;">{{ prof.age_stats.mean }} yrs</strong>
+          <span style="font-size: 0.75rem; color: var(--text-muted); font-weight: 700; text-transform: uppercase;">Average Age</span><br>
+          <strong style="font-size: 1.1rem;">{{ prof.age_stats.mean }} yrs</strong>
         </div>
         <div>
-          <span style="font-size: 0.775rem; color: var(--text-muted); font-weight: 600;">MEAN TEMP</span><br>
-          <strong style="font-size: 1.05rem; {% if prof.temp_stats.mean >= 103.0 %}color: var(--danger);{% endif %}">{{ prof.temp_stats.mean }} &deg;F</strong>
+          <span style="font-size: 0.75rem; color: var(--text-muted); font-weight: 700; text-transform: uppercase;">Average Temp</span><br>
+          <strong style="font-size: 1.1rem; {% if prof.temp_stats.mean >= 103.0 %}color: var(--danger);{% else %}color: var(--primary);{% endif %}">{{ prof.temp_stats.mean }} &deg;F</strong>
         </div>
         <div>
-          <span style="font-size: 0.775rem; color: var(--text-muted); font-weight: 600;">DOMINANT SPECIES</span><br>
-          <span style="font-size: 0.85rem;">
+          <span style="font-size: 0.75rem; color: var(--text-muted); font-weight: 700; text-transform: uppercase;">Dominant Species</span><br>
+          <span style="font-size: 0.875rem;">
             {% for sp, pct in prof.species_distribution.items() %}
-              {% if pct > 20 %}<strong>{{ sp }}</strong> ({{ pct }}%) {% endif %}
+              {% if pct > 20 %}<strong>{{ sp|capitalize }}</strong> ({{ pct }}%) {% endif %}
             {% endfor %}
           </span>
         </div>
       </div>
 
       <!-- Top Clinical Signs Progress Bars -->
-      <h4 style="font-size: 0.9rem; margin-bottom: 0.5rem;">Prevalent Clinical Signs:</h4>
+      <h4 style="font-size: 0.9rem; margin-bottom: 0.65rem; color: var(--text-primary);">Prevalent Clinical Signs in this Group:</h4>
       {% for symp in prof.top_symptoms %}
       <div class="trait-bar-container">
-        <span class="trait-label" title="{{ symp.symptom }}">{{ symp.symptom }}</span>
+        <span class="trait-label" title="{{ symp.symptom }}">{{ symp.symptom|capitalize }}</span>
         <div class="trait-bar-bg">
-          <div class="trait-bar-fill" style="width: {{ symp.prevalence_pct }}%;"></div>
+          <div class="trait-bar-fill" style="width: {{ symp.prevalence_pct }}%; {% if prof_num == 2 %}background: #dc2626;{% elif prof_num == 4 %}background: #d97706;{% endif %}"></div>
         </div>
         <span class="trait-val">{{ symp.prevalence_pct }}%</span>
       </div>
@@ -73,17 +95,19 @@
 </div>
 
 <!-- 2. Interactive Cluster Comparison Tool -->
-<div class="card" style="border-left: 5px solid var(--primary); margin-bottom: 2.5rem;">
+<div class="card" style="border-left: 5px solid var(--primary); margin-bottom: 2.75rem;">
   <div class="card-title">
-    <h3>Interactive Cluster Pairwise Differential Tool</h3>
-    <span class="badge badge-primary">Comparative Diagnostics</span>
+    <div>
+      <span class="badge badge-primary" style="margin-bottom: 0.25rem;">Comparative Diagnostics</span>
+      <h3 style="margin-bottom: 0;">Interactive Cluster Pairwise Differential Tool</h3>
+    </div>
   </div>
-  <p style="font-size: 0.9rem;">
+  <p style="font-size: 0.925rem; color: var(--text-secondary);">
     Select any two clusters below to visualize feature-by-feature percentage differences in symptom prevalence:
   </p>
 
-  <div class="control-panel">
-    <div class="control-group">
+  <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 1rem; margin-bottom: 1.25rem;">
+    <div>
       <label for="compare-cluster-a" class="control-label">Compare Cluster A:</label>
       <select id="compare-cluster-a" class="form-select">
         <option value="0" selected>Cluster 1: Geriatric Bovine Clinical Syndrome</option>
@@ -93,7 +117,7 @@
       </select>
     </div>
 
-    <div class="control-group">
+    <div>
       <label for="compare-cluster-b" class="control-label">Against Cluster B:</label>
       <select id="compare-cluster-b" class="form-select">
         <option value="0">Cluster 1: Geriatric Bovine Clinical Syndrome</option>
@@ -106,19 +130,21 @@
 
   <div id="plotly-cluster-compare" style="width: 100%; height: 440px;"></div>
   <p style="font-size: 0.8rem; color: var(--text-muted); text-align: center; margin-top: 0.5rem; margin-bottom: 0;">
-    Blue bars indicate signs elevated in Cluster A; Red bars indicate signs elevated in Cluster B.
+    Green bars indicate signs elevated in Cluster A; Red bars indicate signs elevated in Cluster B.
   </p>
 </div>
 
 <!-- 3. Centroid Heatmap & ANOVA Feature Contributions -->
-<div class="grid-2" style="margin-bottom: 2.5rem;">
+<div class="grid-2" style="margin-bottom: 2.75rem;">
   <!-- Centroid Heatmap -->
-  <div class="card">
+  <div class="card" style="margin-bottom: 0;">
     <div class="card-title">
-      <h3>Standardized Centroid Heatmap</h3>
-      <span class="badge badge-info">Z-Score Centers</span>
+      <div>
+        <span class="badge badge-info" style="margin-bottom: 0.25rem;">Z-Score Centers</span>
+        <h3 style="margin-bottom: 0;">Standardized Centroid Heatmap</h3>
+      </div>
     </div>
-    <p style="font-size: 0.85rem;">
+    <p style="font-size: 0.85rem; color: var(--text-secondary);">
       Standardized deviations (&mu;=0, &sigma;=1) across key distinguishing variables:
     </p>
     <div class="figure-container" style="margin-top: 0;">
@@ -130,12 +156,14 @@
   </div>
 
   <!-- ANOVA F-Statistic -->
-  <div class="card">
+  <div class="card" style="margin-bottom: 0;">
     <div class="card-title">
-      <h3>Key Feature Contributions (ANOVA F-Stat)</h3>
-      <span class="badge badge-primary">Explanatory Ranking</span>
+      <div>
+        <span class="badge badge-primary" style="margin-bottom: 0.25rem;">Explanatory Ranking</span>
+        <h3 style="margin-bottom: 0;">Key Feature Contributions (ANOVA F-Stat)</h3>
+      </div>
     </div>
-    <p style="font-size: 0.85rem;">
+    <p style="font-size: 0.85rem; color: var(--text-secondary);">
       One-way ANOVA F-statistic evaluating between-cluster variance against within-cluster variance:
     </p>
     <div class="figure-container" style="margin-top: 0;">
@@ -146,7 +174,6 @@
     </div>
   </div>
 </div>
-
 
 <!-- 4. Descriptive Cross-Check with Disease Diagnoses -->
 <div class="card" style="border-left: 5px solid var(--warning);">
@@ -187,7 +214,7 @@
           </tbody>
         </table>
       </div>
-      <p style="font-size: 0.85rem; color: var(--text-secondary);">
+      <p style="font-size: 0.85rem; color: var(--text-secondary); line-height: 1.5;">
         Profile 2 captures 6,974 animals, of which 100% are Anthrax cases in the dataset (presenting with sweats, fatigue, and shortness of breath).
         Conversely, Profile 3 captures Blackleg, Foot and Mouth, Lumpy Virus, and Pneumonia without Anthrax.
       </p>
@@ -205,4 +232,3 @@
 </div>
 
 {% endblock %}
-

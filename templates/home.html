@@ -1,44 +1,61 @@
 {% extends "base.html" %}
 
-{% block title %}Home - Farm Disease-Risk Profile Discovery{% endblock %}
+{% block title %}Farm Disease-Risk Profile Discovery &amp; Triage Dashboard{% endblock %}
 
 {% block content %}
-<div class="page-header">
-  <div style="display: flex; gap: 0.5rem; align-items: center; margin-bottom: 0.5rem;">
-    <span class="badge badge-primary">Unsupervised Machine Learning</span>
-    <span class="badge badge-info">Veterinary Herd Health</span>
-    <span class="badge badge-success">Zero Label Leakage</span>
+
+<!-- Hero Banner: Warm, Welcoming & Friendly -->
+<div class="hero-banner">
+  <div class="hero-content">
+    <div class="hero-badge-row">
+      <span class="badge badge-success">&#10003; 43,778 Audited Livestock Records</span>
+      <span class="badge badge-primary">Unsupervised Machine Learning</span>
+      <span class="badge badge-info">Zero Label Leakage</span>
+    </div>
+    <h1 class="hero-title">Is Your Livestock Showing Signs of Illness?</h1>
+    <p class="hero-subtitle">
+      Check symptoms in 3 simple steps to find your animal's risk pattern, immediate farm care recommendations, 
+      and historical disease correlations discovered from 43,778 farm records.
+    </p>
+    <div class="hero-quick-actions">
+      <a href="#live-triage-dashboard" class="btn btn-primary">
+        ⚡ Start Animal Health Check
+      </a>
+      <a href="{{ url_for('profiles') }}" class="btn btn-outline">
+        📋 Browse 4 Herd Health Profiles &rarr;
+      </a>
+    </div>
   </div>
-  <h1 class="page-title">Farm Disease-Risk Profile Discovery &amp; Triage Dashboard</h1>
-  <p class="page-subtitle">
-    Uncovering latent clinical phenotype complexes across 43,778 livestock records through 
-    unsupervised geometric clustering (Euclidean K-Means vs Manhattan K-Medians) without diagnostic label contamination.
-  </p>
 </div>
 
 <!-- =============================================================
      FEATURED DASHBOARD: LIVE CLINICAL TRIAGE & DISEASE PREDICTOR
      ============================================================= -->
 <div class="predictor-dashboard" id="live-triage-dashboard">
-  <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 1rem; flex-wrap: wrap; gap: 0.5rem;">
+  <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 1.5rem; flex-wrap: wrap; gap: 0.75rem;">
     <div>
-      <span class="badge badge-primary" style="margin-bottom: 0.35rem;">⚡ Interactive Diagnostic Tool</span>
-      <h2 style="margin-bottom: 0.25rem;">Live Clinical Risk Profile &amp; Disease Likelihood Predictor</h2>
-      <p style="font-size: 0.9rem; color: var(--text-muted); margin-bottom: 0;">
-        Input an animal's species, age, temperature, and presenting symptoms to evaluate its nearest syndromic risk profile and inspect empirical disease likelihoods.
+      <span class="badge badge-primary" style="margin-bottom: 0.4rem;">🩺 Smart Triage Assistant</span>
+      <h2 style="margin-bottom: 0.25rem;">Livestock Health Assessment &amp; Risk Predictor</h2>
+      <p style="font-size: 0.925rem; color: var(--text-muted); margin-bottom: 0;">
+        Simple for farmers in the field &bull; Supported by unsupervised K-Means centroid geometry.
       </p>
     </div>
     <div>
-      <span class="badge badge-success">&#9679; Model Ready (k=4 Centroids)</span>
+      <span class="badge badge-success" style="font-size: 0.85rem; padding: 0.4rem 0.9rem;">
+        &#9679; AI Model Ready (k = 4 Centroids)
+      </span>
     </div>
   </div>
 
   <!-- Quick Scenarios (1-Click Test Presets) -->
-  <div style="margin-bottom: 1.25rem; background: var(--bg-surface-alt); padding: 0.85rem 1rem; border-radius: var(--radius-md); border: 1px solid var(--border-color);">
-    <span style="font-size: 0.8rem; font-weight: 700; color: var(--text-secondary); text-transform: uppercase; letter-spacing: 0.05em; display: block; margin-bottom: 0.4rem;">
-      Quick Test Clinical Scenarios (1-Click Fill):
-    </span>
-    <div class="preset-chip-container" style="margin-bottom: 0;">
+  <div class="scenario-bar">
+    <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 0.5rem;">
+      <span style="font-size: 0.825rem; font-weight: 700; color: var(--text-secondary); text-transform: uppercase; letter-spacing: 0.05em;">
+        ⚡ Or Try a 1-Click Clinical Scenario:
+      </span>
+      <span style="font-size: 0.785rem; color: var(--text-muted);">Fills inputs automatically for testing</span>
+    </div>
+    <div class="preset-chip-container">
       <button type="button" class="preset-chip" onclick="applyPreset('anthrax')">
         🚨 <strong>Scenario 1:</strong> Acute Diaphoresis / Sweats
       </button>
@@ -54,125 +71,264 @@
     </div>
   </div>
 
-  <!-- Main Inputs Form Grid -->
+  <!-- Main Inputs Form -->
   <form id="triage-form" onsubmit="event.preventDefault(); runPrediction();">
-    <div class="grid-2" style="margin-bottom: 1.5rem;">
-      
-      <!-- Left Column: Demographics & Vitals -->
+    
+    <!-- Step 1: Select Animal Species -->
+    <div class="predictor-step-header">
+      <span class="step-number">1</span>
       <div>
-        <!-- 1. Species Selection -->
-        <label class="control-label" style="display: block; margin-bottom: 0.4rem;">
-          1. Livestock Species:
+        <h3 style="margin-bottom: 0.1rem; font-size: 1.15rem;">Select Animal</h3>
+        <p style="font-size: 0.825rem; color: var(--text-muted); margin-bottom: 0;">Which type of livestock are you examining?</p>
+      </div>
+    </div>
+
+    <div class="species-grid">
+      <div class="species-option">
+        <input type="radio" id="sp-cow" name="species" value="cow" checked onchange="updateSpeciesHint('cow')">
+        <label for="sp-cow" class="species-card">
+          <span class="species-icon">🐄</span>
+          <span class="species-name">Cow / Cattle</span>
+          <span class="species-temp-hint">Normal: ~101.5&deg;F &ndash; 102.5&deg;F</span>
         </label>
-        <div class="species-grid">
-          <div class="species-option">
-            <input type="radio" id="sp-cow" name="species" value="cow" checked>
-            <label for="sp-cow" class="species-label">
-              <span class="species-icon">🐄</span>
-              <span>Cow</span>
-            </label>
-          </div>
-          <div class="species-option">
-            <input type="radio" id="sp-buffalo" name="species" value="buffalo">
-            <label for="sp-buffalo" class="species-label">
-              <span class="species-icon">🐃</span>
-              <span>Buffalo</span>
-            </label>
-          </div>
-          <div class="species-option">
-            <input type="radio" id="sp-goat" name="species" value="goat">
-            <label for="sp-goat" class="species-label">
-              <span class="species-icon">🐐</span>
-              <span>Goat</span>
-            </label>
-          </div>
-          <div class="species-option">
-            <input type="radio" id="sp-sheep" name="species" value="sheep">
-            <label for="sp-sheep" class="species-label">
-              <span class="species-icon">🐑</span>
-              <span>Sheep</span>
-            </label>
-          </div>
-        </div>
+      </div>
 
-        <!-- 2. Age Input Slider -->
-        <div class="slider-group">
-          <div class="slider-header">
-            <label for="input-age" class="control-label">2. Animal Age (Years):</label>
-            <span class="slider-val-badge" id="age-display">5.0 yrs</span>
-          </div>
-          <input type="range" id="input-age" class="range-slider" min="1" max="15" step="0.5" value="5" 
-                 oninput="updateAgeDisplay(this.value)">
-          <div style="display: flex; justify-content: space-between; font-size: 0.75rem; color: var(--text-muted); margin-top: 0.2rem;">
-            <span>1 yr (Young)</span>
-            <span>7 yrs (Median)</span>
-            <span>15 yrs (Senior)</span>
-          </div>
-        </div>
+      <div class="species-option">
+        <input type="radio" id="sp-buffalo" name="species" value="buffalo" onchange="updateSpeciesHint('buffalo')">
+        <label for="sp-buffalo" class="species-card">
+          <span class="species-icon">🐃</span>
+          <span class="species-name">Buffalo</span>
+          <span class="species-temp-hint">Normal: ~100.8&deg;F &ndash; 102.0&deg;F</span>
+        </label>
+      </div>
 
-        <!-- 3. Body Temperature Input Slider -->
-        <div class="slider-group">
-          <div class="slider-header">
-            <label for="input-temp" class="control-label">3. Body Temperature (&deg;F):</label>
-            <span class="slider-val-badge" id="temp-display" style="color: var(--primary);">102.2 &deg;F (Normal)</span>
-          </div>
-          <input type="range" id="input-temp" class="range-slider" min="100.0" max="105.0" step="0.1" value="102.2" 
-                 oninput="updateTempDisplay(this.value)">
-          <div style="display: flex; justify-content: space-between; font-size: 0.75rem; color: var(--text-muted); margin-top: 0.2rem;">
-            <span>100.0 &deg;F (Sub-normative)</span>
-            <span>102.2 &deg;F (Baseline)</span>
-            <span style="color: var(--danger); font-weight: 600;">105.0 &deg;F (Severe Hyperthermia)</span>
-          </div>
+      <div class="species-option">
+        <input type="radio" id="sp-goat" name="species" value="goat" onchange="updateSpeciesHint('goat')">
+        <label for="sp-goat" class="species-card">
+          <span class="species-icon">🐐</span>
+          <span class="species-name">Goat</span>
+          <span class="species-temp-hint">Normal: ~102.0&deg;F &ndash; 103.5&deg;F</span>
+        </label>
+      </div>
+
+      <div class="species-option">
+        <input type="radio" id="sp-sheep" name="species" value="sheep" onchange="updateSpeciesHint('sheep')">
+        <label for="sp-sheep" class="species-card">
+          <span class="species-icon">🐑</span>
+          <span class="species-name">Sheep</span>
+          <span class="species-temp-hint">Normal: ~102.0&deg;F &ndash; 103.5&deg;F</span>
+        </label>
+      </div>
+    </div>
+
+    <!-- Step 2: Animal Vitals (Age & Thermometer) -->
+    <div class="predictor-step-header">
+      <span class="step-number">2</span>
+      <div>
+        <h3 style="margin-bottom: 0.1rem; font-size: 1.15rem;">Animal Vitals &amp; Age</h3>
+        <p style="font-size: 0.825rem; color: var(--text-muted); margin-bottom: 0;">Estimate the animal's age and recorded rectal temperature.</p>
+      </div>
+    </div>
+
+    <div class="grid-2">
+      <!-- Age Control -->
+      <div class="vitals-box">
+        <div class="thermometer-display-row">
+          <label for="input-age" class="control-label" style="margin-bottom: 0;">Animal Age:</label>
+          <span class="thermometer-val-badge" id="age-display" style="color: var(--primary);">
+            5.0 Years <span style="font-size: 0.75rem; font-weight: 500; color: var(--text-muted);">(Adult)</span>
+          </span>
+        </div>
+        <input type="range" id="input-age" class="range-slider" min="1" max="15" step="0.5" value="5" 
+               oninput="updateAgeDisplay(this.value)">
+        <div style="display: flex; justify-content: space-between; font-size: 0.75rem; color: var(--text-muted); margin-top: 0.2rem;">
+          <span>🍼 1 yr (Calf/Young)</span>
+          <span>🌿 7 yrs (Prime Adult)</span>
+          <span>👴 15 yrs (Senior)</span>
         </div>
       </div>
 
-      <!-- Right Column: Multi-Select Clinical Symptoms -->
-      <div>
-        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.4rem;">
-          <label class="control-label">4. Clinical Symptoms (<span id="symptoms-count">0</span> selected):</label>
-          <button type="button" class="btn btn-outline" style="padding: 0.15rem 0.5rem; font-size: 0.75rem;" onclick="clearAllSymptoms()">
-            Clear All
-          </button>
+      <!-- Interactive Color Thermometer Control -->
+      <div class="vitals-box">
+        <div class="thermometer-display-row">
+          <label for="input-temp" class="control-label" style="margin-bottom: 0;">Body Temperature:</label>
+          <span class="thermometer-val-badge" id="temp-display">
+            🌡️ 102.2 &deg;F <span style="font-size: 0.75rem; font-weight: 600; color: var(--success);">(Normal)</span>
+          </span>
         </div>
-        <p style="font-size: 0.8rem; color: var(--text-muted); margin-bottom: 0.5rem;">
-          Click the symptom tags below to toggle them on or off:
-        </p>
-
-        <!-- Search Symptoms Filter -->
-        <input type="text" id="symptom-search" class="form-input" placeholder="🔍 Filter symptoms..." 
-               style="width: 100%; margin-bottom: 0.5rem; font-size: 0.825rem; padding: 0.35rem 0.65rem;"
-               oninput="filterSymptomTags(this.value)">
-
-        <!-- Symptom Tag Cloud -->
-        <div class="symptom-tag-cloud" id="symptom-cloud">
-          {% if prep_log and prep_log.raw_audit and prep_log.raw_audit.all_symptoms %}
-            {% for symp in prep_log.raw_audit.all_symptoms %}
-              <div class="symptom-tag" data-symptom="{{ symp }}" onclick="toggleSymptom(this)">
-                <span>+</span> {{ symp }}
-              </div>
-            {% endfor %}
-          {% endif %}
+        <input type="range" id="input-temp" class="range-slider" min="100.0" max="105.0" step="0.1" value="102.2" 
+               oninput="updateTempDisplay(this.value)">
+        <div class="temp-quick-chips">
+          <span style="font-size: 0.75rem; color: var(--text-muted); align-self: center; margin-right: 0.25rem;">Quick Set:</span>
+          <button type="button" class="temp-chip" onclick="setTemperature(101.5)">🟢 Normal (101.5&deg;F)</button>
+          <button type="button" class="temp-chip" onclick="setTemperature(103.0)">🟡 Mild Fever (103.0&deg;F)</button>
+          <button type="button" class="temp-chip" onclick="setTemperature(104.4)">🔴 High Fever (104.4&deg;F)</button>
         </div>
       </div>
     </div>
 
-    <!-- Submit Button -->
-    <button type="submit" id="btn-run-prediction" class="btn btn-primary" style="width: 100%; font-size: 1.05rem; padding: 0.85rem; font-weight: 700; box-shadow: 0 4px 6px -1px rgba(37, 99, 235, 0.3);">
-      ⚡ Run Clinical Assessment &amp; Predict Disease Risk
+    <!-- Step 3: Presenting Symptoms (Categorized & Easy to Select) -->
+    <div class="predictor-step-header" style="margin-top: 1.5rem;">
+      <span class="step-number">3</span>
+      <div style="display: flex; justify-content: space-between; align-items: flex-end; width: 100%; flex-wrap: wrap; gap: 0.5rem;">
+        <div>
+          <h3 style="margin-bottom: 0.1rem; font-size: 1.15rem;">Observable Symptoms &amp; Signs</h3>
+          <p style="font-size: 0.825rem; color: var(--text-muted); margin-bottom: 0;">Click on any symptoms you see on the animal.</p>
+        </div>
+        <div style="display: flex; align-items: center; gap: 0.6rem;">
+          <span class="badge badge-primary" id="symptoms-count-badge">0 Signs Selected</span>
+          <button type="button" class="btn btn-outline" style="padding: 0.25rem 0.65rem; font-size: 0.785rem;" onclick="clearAllSymptoms()">
+            Clear All
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <div class="symptoms-box">
+      <!-- Category Filter Tabs -->
+      <div class="symptom-category-tabs">
+        <button type="button" class="symptom-tab-btn active" onclick="filterSymptomCategory('all', this)">
+          ✨ All Signs (24)
+        </button>
+        <button type="button" class="symptom-tab-btn" onclick="filterSymptomCategory('eating', this)">
+          🍽️ Appetite &amp; Energy
+        </button>
+        <button type="button" class="symptom-tab-btn" onclick="filterSymptomCategory('breathing', this)">
+          🫁 Breathing &amp; Chest
+        </button>
+        <button type="button" class="symptom-tab-btn" onclick="filterSymptomCategory('movement', this)">
+          🦵 Walking &amp; Legs
+        </button>
+        <button type="button" class="symptom-tab-btn" onclick="filterSymptomCategory('skin', this)">
+          🩹 Skin, Sores &amp; Marks
+        </button>
+      </div>
+
+      <!-- Quick Search Input -->
+      <div style="position: relative; margin-bottom: 0.85rem;">
+        <input type="text" id="symptom-search" class="form-input" 
+               placeholder="🔍 Type to search symptoms (e.g. fever, sweats, lameness, blisters)..." 
+               oninput="filterSymptomTags(this.value)">
+      </div>
+
+      <!-- Interactive Symptom Tag Cloud -->
+      <div class="symptom-cloud" id="symptom-cloud">
+        {% if prep_log and prep_log.raw_audit and prep_log.raw_audit.all_symptoms %}
+          {% for symp in prep_log.raw_audit.all_symptoms %}
+            <div class="symptom-tag" data-symptom="{{ symp }}" onclick="toggleSymptom(this)">
+              <span class="tag-check">➕</span>
+              <span>{{ symp }}</span>
+            </div>
+          {% endfor %}
+        {% endif %}
+      </div>
+    </div>
+
+    <!-- Submit CTA Button -->
+    <button type="submit" id="btn-run-prediction" class="btn btn-primary" 
+            style="width: 100%; font-size: 1.15rem; padding: 1.1rem; font-weight: 800; border-radius: var(--radius-md); box-shadow: 0 6px 20px var(--primary-glow);">
+      ⚡ Run Health Check &amp; Predict Clinical Risk
     </button>
   </form>
 
-  <!-- Live Results Panel (Populated dynamically via JS) -->
-  <div id="prediction-result-container" style="display: none; margin-top: 1.5rem;">
-    <!-- Result Card injected here -->
+  <!-- Live Dynamic Result Card Container -->
+  <div id="prediction-result-container" style="display: none; margin-top: 2rem;">
+    <!-- Rendered via renderPredictionResult() in main.js -->
   </div>
 </div>
 
 <!-- =============================================================
-     1. Headline Findings (Pulled from real pipeline outputs)
+     1. Discovered Herd Health Profiles Overview (Plain English)
+     ============================================================= -->
+<div style="display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 1.25rem; flex-wrap: wrap; gap: 0.5rem;">
+  <div>
+    <span class="badge badge-primary" style="margin-bottom: 0.35rem;">Discovered Patterns</span>
+    <h2 style="margin-bottom: 0.2rem;">4 Discovered Herd Health Profiles (k = 4)</h2>
+    <p style="font-size: 0.9rem; color: var(--text-muted); margin-bottom: 0;">
+      Natural clinical groupings identified across 43,778 livestock records using unsupervised geometric clustering:
+    </p>
+  </div>
+  <a href="{{ url_for('profiles') }}" class="btn btn-outline" style="font-size: 0.85rem; padding: 0.4rem 0.85rem;">
+    View Full Profiles &amp; Compare &rarr;
+  </a>
+</div>
+
+<div class="grid-2" style="margin-bottom: 2.75rem;">
+  <!-- Profile 1 Card -->
+  <div class="card" style="border-top: 4px solid #2563eb; margin-bottom: 0;">
+    <div class="card-title">
+      <div>
+        <span class="badge badge-primary">Profile 1 (24.1% of Herd)</span>
+        <h3 style="margin-top: 0.25rem; margin-bottom: 0;">Senior Cattle Appetite Loss Syndrome</h3>
+      </div>
+      <span style="font-size: 1.5rem;">🐂</span>
+    </div>
+    <p style="font-size: 0.9rem; color: var(--text-secondary); line-height: 1.5; margin-bottom: 1rem;">
+      Common in older dairy cattle and buffalo (avg 11.9 yrs). Characterized by severe loss of appetite (75.7%) and lethargy/depression (51.2%) without high acute fever.
+    </p>
+    <div style="background: var(--bg-surface-alt); padding: 0.65rem 0.85rem; border-radius: var(--radius-sm); font-size: 0.825rem; color: var(--text-muted);">
+      💡 <strong>Care Advice:</strong> Offer palatable soft green feeds, ensure adequate hydration, and monitor rumination.
+    </div>
+  </div>
+
+  <!-- Profile 2 Card -->
+  <div class="card" style="border-top: 4px solid #dc2626; margin-bottom: 0;">
+    <div class="card-title">
+      <div>
+        <span class="badge badge-danger">Profile 2 (15.9% of Herd)</span>
+        <h3 style="margin-top: 0.25rem; margin-bottom: 0;">Acute Respiratory-Diaphoretic Crisis</h3>
+      </div>
+      <span style="font-size: 1.5rem;">🚨</span>
+    </div>
+    <p style="font-size: 0.9rem; color: var(--text-secondary); line-height: 1.5; margin-bottom: 1rem;">
+      Severe respiratory distress marked by heavy sweating, acute fatigue, and shortness of breath (~51% each). 
+      Historical cross-check shows 100% correlation with Anthrax cases.
+    </p>
+    <div style="background: var(--danger-bg); border: 1px solid var(--danger-border); padding: 0.65rem 0.85rem; border-radius: var(--radius-sm); font-size: 0.825rem; color: var(--danger);">
+      🚨 <strong>Emergency Advice:</strong> Immediate isolation. High suspicion of acute infectious illness. Do not slaughter; call vet immediately.
+    </div>
+  </div>
+
+  <!-- Profile 3 Card -->
+  <div class="card" style="border-top: 4px solid #059669; margin-bottom: 0;">
+    <div class="card-title">
+      <div>
+        <span class="badge badge-success">Profile 3 (32.2% of Herd)</span>
+        <h3 style="margin-top: 0.25rem; margin-bottom: 0;">Young Stock Sub-Febrile &amp; Limb Pattern</h3>
+      </div>
+      <span style="font-size: 1.5rem;">🐐</span>
+    </div>
+    <p style="font-size: 0.9rem; color: var(--text-secondary); line-height: 1.5; margin-bottom: 1rem;">
+      Dominant in young goats and sheep (avg 4.8 yrs) with lower/normal temperature (~101.2&deg;F). Presents with focal lumps (42.1%) and lameness (22.9%).
+    </p>
+    <div style="background: var(--bg-surface-alt); padding: 0.65rem 0.85rem; border-radius: var(--radius-sm); font-size: 0.825rem; color: var(--text-muted);">
+      💡 <strong>Care Advice:</strong> Inspect hooves and skin nodules. Check for flock lameness and vector (tick/fly) exposure.
+    </div>
+  </div>
+
+  <!-- Profile 4 Card -->
+  <div class="card" style="border-top: 4px solid #d97706; margin-bottom: 0;">
+    <div class="card-title">
+      <div>
+        <span class="badge badge-warning">Profile 4 (27.8% of Herd)</span>
+        <h3 style="margin-top: 0.25rem; margin-bottom: 0;">Acute High-Fever Systemic Illness</h3>
+      </div>
+      <span style="font-size: 1.5rem;">🔥</span>
+    </div>
+    <p style="font-size: 0.9rem; color: var(--text-secondary); line-height: 1.5; margin-bottom: 1rem;">
+      Marked by severe hyperthermia (mean temp 103.8&deg;F) across all livestock species, accompanied by acute appetite loss (78.7%) and depression.
+    </p>
+    <div style="background: var(--warning-bg); border: 1px solid var(--warning-border); padding: 0.65rem 0.85rem; border-radius: var(--radius-sm); font-size: 0.825rem; color: var(--warning);">
+      ⚠️ <strong>Care Advice:</strong> Cool animal with wet cloths in shade. Provide electrolyte water and administer prescribed antipyretics.
+    </div>
+  </div>
+</div>
+
+<!-- =============================================================
+     2. Key Empirical Findings Grid (Real Pipeline Data)
      ============================================================= -->
 <h2 style="margin-bottom: 1rem;">Key Empirical Pipeline Findings</h2>
-<div class="grid-4" style="margin-bottom: 2.5rem;">
+<div class="grid-4" style="margin-bottom: 2.75rem;">
   <div class="kpi-card">
     <span class="kpi-label">Audited Population</span>
     <span class="kpi-value">
@@ -215,49 +371,7 @@
 </div>
 
 <!-- =============================================================
-     2. Chosen Configuration Hero Card
-     ============================================================= -->
-<div class="card" style="background: linear-gradient(135deg, var(--bg-surface), var(--primary-bg)); border-left: 5px solid var(--primary); margin-bottom: 2.5rem;">
-  <div class="card-title">
-    <div>
-      <span class="badge badge-primary" style="margin-bottom: 0.35rem;">Final Primary Selection</span>
-      <h3 style="margin-bottom: 0;">Selected Configuration: K-Means (Euclidean, k = 4)</h3>
-    </div>
-    <a href="{{ url_for('clustering') }}" class="btn btn-primary">Inspect Workflow &rarr;</a>
-  </div>
-  <p style="font-size: 0.95rem; line-height: 1.6; margin-bottom: 1rem;">
-    {% if metrics %}
-      {{ metrics.selection_justification.written_justification }}
-    {% else %}
-      Configuration selected balancing WCSS elbow inflection, minimal Davies-Bouldin index (1.9161), high silhouette score (0.1405), and distinct clinical interpretability.
-    {% endif %}
-  </p>
-  <div style="display: flex; gap: 1.5rem; flex-wrap: wrap; border-top: 1px solid var(--border-color); padding-top: 0.75rem;">
-    <div>
-      <span style="font-size: 0.8rem; color: var(--text-muted); font-weight: 600;">ALGORITHM</span><br>
-      <strong>{% if metrics %}{{ metrics.selection_justification.chosen_algorithm }}{% else %}K-Means{% endif %}</strong>
-    </div>
-    <div>
-      <span style="font-size: 0.8rem; color: var(--text-muted); font-weight: 600;">DISTANCE METRIC</span><br>
-      <strong>{% if metrics %}{{ metrics.selection_justification.chosen_distance }}{% else %}Euclidean{% endif %}</strong>
-    </div>
-    <div>
-      <span style="font-size: 0.8rem; color: var(--text-muted); font-weight: 600;">WCSS / INERTIA</span><br>
-      <strong>{% if metrics %}{{ "{:,.2f}".format(metrics.selection_justification.metrics_at_chosen_k.wcss_inertia) }}{% else %}144,176.66{% endif %}</strong>
-    </div>
-    <div>
-      <span style="font-size: 0.8rem; color: var(--text-muted); font-weight: 600;">SILHOUETTE SCORE</span><br>
-      <strong>{% if metrics %}{{ metrics.selection_justification.metrics_at_chosen_k.silhouette }}{% else %}0.1405{% endif %}</strong>
-    </div>
-    <div>
-      <span style="font-size: 0.8rem; color: var(--text-muted); font-weight: 600;">DAVIES-BOULDIN INDEX</span><br>
-      <strong class="highlight-best">{% if metrics %}{{ metrics.selection_justification.metrics_at_chosen_k.davies_bouldin }}{% else %}1.9161{% endif %}</strong>
-    </div>
-  </div>
-</div>
-
-<!-- =============================================================
-     3. Objective Checklist Panel (Mapped to Evidence Pages)
+     3. Project Architecture & Milestone Cards
      ============================================================= -->
 <h2 style="margin-bottom: 1rem;">Core Project Milestones &amp; Evidence Mapping</h2>
 <p style="margin-bottom: 1.5rem;">
@@ -273,7 +387,7 @@
     </div>
     <h3 style="margin-bottom: 0.5rem;">Data Preparation</h3>
     <p style="font-size: 0.9rem; flex: 1;">
-      Audited missingness, outliers, and duplicates; implemented multi-hot encoding for 24 symptoms to eliminate 3-slot positional bias; standardized Age and Temperature; isolated the Disease diagnosis.
+      Audited missingness, outliers, and duplicates; implemented multi-hot encoding for 24 symptoms to eliminate positional bias; standardized vitals; strictly isolated Disease labels.
     </p>
     <div style="margin-top: auto; border-top: 1px solid var(--border-color); padding-top: 0.75rem;">
       <a href="{{ url_for('preprocessing') }}" class="btn btn-outline" style="width: 100%;">
@@ -317,24 +431,4 @@
   </div>
 </div>
 
-<!-- 4. Quick Architecture & Protocol Summary -->
-<div class="card">
-  <h3>Methodological Principles</h3>
-  <div class="grid-2" style="margin-top: 1rem;">
-    <div>
-      <h4>Zero Diagnostic Label Leakage</h4>
-      <p style="font-size: 0.9rem;">
-        The Kaggle <code>Disease</code> label column was completely isolated prior to any scaling, encoding, or distance computations. 
-        It is referenced solely after clustering as an optional descriptive cross-check to observe clinical concordance.
-      </p>
-    </div>
-    <div>
-      <h4>Dual-Metric Distance Geometry</h4>
-      <p style="font-size: 0.9rem;">
-        Standard K-Means operates in Euclidean space (&real;<sup>30</sup>). Because 24 features are binary symptom indicators, 
-        we also built a Manhattan K-Medians model where coordinates are medians, providing an honest comparison of L1 vs L2 geometries.
-      </p>
-    </div>
-  </div>
-</div>
 {% endblock %}

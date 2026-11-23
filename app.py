@@ -270,7 +270,15 @@ def api_predict():
             "badge_class": "badge-danger",
             "color": "#dc2626",
             "icon": "🚨",
-            "action": "Immediate quarantine of this animal. High fever or severe systemic distress detected. Notify herd veterinarian and conduct urgent diagnostic testing."
+            "action": "Immediate quarantine of this animal. High fever or severe systemic distress detected. Notify herd veterinarian and conduct urgent diagnostic testing.",
+            "farmer_summary": "High risk of acute systemic illness or infectious fever. Immediate isolation from herd required.",
+            "immediate_steps": [
+                "Separate this animal into a dedicated, covered sick stall immediately.",
+                "Do not allow contact or shared feed/water troughs with the rest of the herd.",
+                "Provide clean, cool drinking water in shade; do not force heavy feeding.",
+                "Call your registered veterinarian or local government livestock officer immediately."
+            ],
+            "speech_text": f"Warning! High urgency assessment for this {animal}. Severe fever or respiratory distress detected. Please isolate the animal immediately and call a veterinarian."
         }
     elif temperature >= 102.5 or any("blister" in s or "sores" in s for s in symptoms_set) or any("swelling" in s for s in symptoms_set):
         urgency = {
@@ -278,7 +286,15 @@ def api_predict():
             "badge_class": "badge-warning",
             "color": "#d97706",
             "icon": "⚠️",
-            "action": "Isolate in observation stall. Examine hooves, mouth, and mucosa for lesions. Monitor vitals twice daily."
+            "action": "Isolate in observation stall. Examine hooves, mouth, and mucosa for lesions. Monitor vitals twice daily.",
+            "farmer_summary": "Moderate risk signs detected. Keep under close watch and examine mouth, hooves, and skin.",
+            "immediate_steps": [
+                "Move to a clean observation pen for close daily monitoring.",
+                "Inspect mouth, tongue, and hooves for blisters, sores, or lameness.",
+                "Record body temperature morning and evening.",
+                "Consult your veterinarian if symptoms persist past 24 hours."
+            ],
+            "speech_text": f"Attention. Elevated risk assessment for this {animal}. Please place the animal in an observation stall and check hooves and mouth for blisters or lesions."
         }
     else:
         urgency = {
@@ -286,7 +302,15 @@ def api_predict():
             "badge_class": "badge-success",
             "color": "#059669",
             "icon": "🟢",
-            "action": "Supportive nutritional and hydration care. Monitor feed intake and rumination patterns."
+            "action": "Supportive nutritional and hydration care. Monitor feed intake and rumination patterns.",
+            "farmer_summary": "No acute fever or severe distress markers. Regular herd care and nutrition recommended.",
+            "immediate_steps": [
+                "Ensure nutritious green fodder, fresh water, and clean bedding.",
+                "Observe appetite and cud-chewing (rumination) over the next 48 hours.",
+                "Isolate only if new symptoms like shivering or breathing difficulty develop.",
+                "Maintain standard herd vaccination and deworming schedule."
+            ],
+            "speech_text": f"Assessment complete. Routine observation for this {animal}. Vitals are within manageable limits. Continue good feeding and clean water."
         }
 
     return jsonify({

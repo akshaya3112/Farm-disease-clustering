@@ -12,15 +12,6 @@ class KMedians:
     """
     K-Medians Clustering with Manhattan (L1) Distance Metric.
     
-    Mathematical Foundation:
-    -----------------------
-    In standard K-Means, the cluster centroid is the mean of assigned points,
-    which minimizes the sum of squared Euclidean (L2) errors.
-    Under the Manhattan (L1) metric:
-        Cost(C) = sum_{i in C} sum_{j=1}^D |x_{i,j} - m_{c,j}|
-    The spatial center that minimizes this L1 cost along each independent dimension j
-    is the univariate median:
-        m_{c,j} = Median({x_{i,j} : point i in cluster c})
     
     This class implements an exact, vectorized coordinate-wise K-Medians algorithm
     with multiple random restarts (n_init) and fixed seeds for reproducibility.

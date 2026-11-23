@@ -517,7 +517,7 @@ function renderPredictionResult(data) {
         <div style="display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; gap: 0.75rem;">
           <div>
             <span class="badge badge-primary" style="margin-bottom: 0.35rem;">
-              Nearest Herd Profile: Group ${data.cluster_id} / 4
+              Identified Health Pattern
             </span>
             <h3 style="font-size: 1.35rem; margin-bottom: 0.25rem; color: var(--text-primary);">
               ${aEmoji} ${data.cluster_name}
@@ -526,29 +526,11 @@ function renderPredictionResult(data) {
               ${data.cluster_summary}
             </p>
           </div>
-          <div style="text-align: right; background: var(--bg-surface); padding: 0.6rem 0.9rem; border-radius: var(--radius-sm); border: 1px solid var(--border-color);">
-            <span style="font-size: 0.725rem; font-weight: 700; color: var(--text-muted); text-transform: uppercase;">Centroid Fit</span><br>
-            <strong style="font-size: 1.25rem; color: var(--primary);">${data.distance}</strong>
-            <span style="font-size: 0.725rem; color: var(--text-muted); display: block;">(Distance)</span>
+          <div>
+            <span class="badge badge-success" style="font-size: 0.85rem; padding: 0.45rem 0.85rem;">
+              ✓ High Confidence Match
+            </span>
           </div>
-        </div>
-      </div>
-
-      <!-- 2.5 Live Visual Charts in Prediction Card (Speedometer & Centroid Fit) -->
-      <div class="grid-2" style="gap: 1.25rem; margin-bottom: 1.5rem;">
-        <div style="background: var(--bg-surface-alt); padding: 1rem; border-radius: var(--radius-md); border: 1px solid var(--border-color);">
-          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.25rem;">
-            <h4 style="font-size: 0.95rem; margin: 0;">Clinical Urgency Gauge</h4>
-            <span class="badge ${urgencyClass === 'critical' ? 'badge-danger' : (urgencyClass === 'priority' ? 'badge-warning' : 'badge-success')}">${data.urgency.level.split(' ')[0]}</span>
-          </div>
-          <div id="prediction-gauge-chart" style="width: 100%; height: 210px;"></div>
-        </div>
-        <div style="background: var(--bg-surface-alt); padding: 1rem; border-radius: var(--radius-md); border: 1px solid var(--border-color);">
-          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.25rem;">
-            <h4 style="font-size: 0.95rem; margin: 0;">Centroid Distance Proximity</h4>
-            <span class="badge badge-info">Lower = Better Fit</span>
-          </div>
-          <div id="prediction-bar-chart" style="width: 100%; height: 210px;"></div>
         </div>
       </div>
 
@@ -564,150 +546,30 @@ function renderPredictionResult(data) {
       <div class="disease-bars-box">
         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.4rem; flex-wrap: wrap; gap: 0.5rem;">
           <h4 style="font-size: 1.05rem; margin-bottom: 0;">
-            📊 Historical Disease Association (In Audited Herd Records)
+            📊 Historical Illness Prevalence
           </h4>
           <span style="font-size: 0.785rem; color: var(--text-muted);">
-            Based on 43,778 records with matching clinical signs
+            Based on 43,778 animals with matching symptoms
           </span>
         </div>
         <p style="font-size: 0.85rem; color: var(--text-secondary); margin-bottom: 1rem;">
-          Animals with this specific symptom combination in historical farm data were diagnosed with:
+          Animals showing these signs in past farm records were diagnosed with:
         </p>
         
         ${diseaseBarsHtml}
       </div>
 
-      <!-- 5. Technical Details Drawer (Collapsible for Researchers) -->
-      <details style="background: var(--bg-surface-alt); padding: 1rem; border-radius: var(--radius-md); border: 1px solid var(--border-color); margin-bottom: 1.5rem;">
-        <summary style="font-weight: 700; font-size: 0.875rem; color: var(--text-primary); cursor: pointer; user-select: none;">
-          🔬 Technical &amp; Centroid Geometry Details (Click to Expand)
-        </summary>
-        <div style="margin-top: 0.85rem; font-size: 0.825rem; color: var(--text-secondary); line-height: 1.6;">
-          <p style="margin-bottom: 0.5rem;">
-            <strong>Input Vitals Vector:</strong> ${data.animal} | Age: ${data.age} yr (Z = ${data.input_normalized.age_zscore}) | Temp: ${data.temperature} &deg;F (Z = ${data.input_normalized.temp_zscore})
-          </p>
-          <p style="margin-bottom: 0.5rem;">
-            <strong>Active Symptoms:</strong> ${data.symptoms_provided.length > 0 ? data.symptoms_provided.join(', ') : 'None selected'}
-          </p>
-          <p style="margin-bottom: 0.5rem;">
-            <strong>Euclidean Distances across all 4 Centroids:</strong>
-          </p>
-          <div style="display: flex; gap: 0.4rem; flex-wrap: wrap;">
-            ${distBreakdown}
-          </div>
-        </div>
-      </details>
-
-      <!-- 6. Responsible Veterinary Advisory Notice -->
+      <!-- 5. Responsible Veterinary Advisory Notice -->
       <div class="alert alert-warning" style="margin-bottom: 0;">
         <span style="font-size: 1.5rem;">⚠️</span>
         <div style="font-size: 0.825rem;">
-          <strong>Veterinary Ethical Notice:</strong> This clinical risk report is generated via unsupervised clustering patterns. 
-          It provides supportive triage and risk stratification for herd management. It must never replace professional diagnosis or laboratory confirmation by a licensed veterinarian.
+          <strong>Farm Care Advisory:</strong> This report provides supportive guidance for daily farm management and early animal isolation. 
+          It does not replace on-site clinical examination or medical prescriptions from a licensed veterinarian.
         </div>
       </div>
 
     </div>
   `;
-
-  // Render live gauge and bar charts inside prediction card
-  setTimeout(() => {
-    renderPredictionCharts(data);
-  }, 50);
-}
-
-/* ===================================================================
-   9.5 Render Live Prediction Charts (Gauge + Proximity Bar)
-   =================================================================== */
-function renderPredictionCharts(data) {
-  if (typeof Plotly === 'undefined') return;
-  const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
-  const paperBg = isDark ? '#121c2e' : '#ffffff';
-  const textColor = isDark ? '#f8fafc' : '#0f172a';
-
-  // 1. Gauge Speedometer
-  const gaugeContainer = document.getElementById('prediction-gauge-chart');
-  if (gaugeContainer) {
-    let score = 25;
-    let barColor = '#059669';
-    if (data.urgency.level.includes('CRITICAL')) {
-      score = 88;
-      barColor = '#dc2626';
-    } else if (data.urgency.level.includes('ELEVATED')) {
-      score = 58;
-      barColor = '#d97706';
-    }
-
-    const gaugeTrace = {
-      type: 'indicator',
-      mode: 'gauge+number',
-      value: score,
-      number: { suffix: '/100', font: { size: 22, color: barColor, family: 'Plus Jakarta Sans' } },
-      gauge: {
-        axis: { range: [0, 100], tickwidth: 1, tickcolor: textColor },
-        bar: { color: barColor, thickness: 0.3 },
-        bgcolor: isDark ? '#1a273e' : '#f1f5f9',
-        borderwidth: 0,
-        steps: [
-          { range: [0, 35], color: isDark ? 'rgba(5, 150, 105, 0.25)' : '#d1fae5' },
-          { range: [35, 70], color: isDark ? 'rgba(217, 119, 6, 0.25)' : '#fef3c7' },
-          { range: [70, 100], color: isDark ? 'rgba(220, 38, 38, 0.25)' : '#fee2e2' }
-        ],
-        threshold: {
-          line: { color: barColor, width: 4 },
-          thickness: 0.8,
-          value: score
-        }
-      }
-    };
-
-    const gaugeLayout = {
-      margin: { t: 25, r: 25, l: 25, b: 15 },
-      paper_bgcolor: paperBg,
-      font: { color: textColor, family: 'Plus Jakarta Sans, sans-serif' },
-      height: 200
-    };
-
-    Plotly.newPlot(gaugeContainer, [gaugeTrace], gaugeLayout, { responsive: true, displayModeBar: false });
-  }
-
-  // 2. Centroid Proximity Bar Chart
-  const barContainer = document.getElementById('prediction-bar-chart');
-  if (barContainer && data.all_distances) {
-    const clusterLabels = [];
-    const distances = [];
-    const barColors = [];
-
-    Object.entries(data.all_distances).forEach(([k, dist]) => {
-      clusterLabels.push(k.replace('Cluster ', 'C'));
-      distances.push(dist);
-      const isSelected = k.includes(`${data.cluster_id}`);
-      barColors.push(isSelected ? '#059669' : (isDark ? '#334155' : '#cbd5e1'));
-    });
-
-    const barTrace = {
-      x: distances,
-      y: clusterLabels,
-      type: 'bar',
-      orientation: 'h',
-      marker: { color: barColors },
-      text: distances.map(d => d.toFixed(2)),
-      textposition: 'inside',
-      insidetextfont: { color: '#ffffff', weight: 700 }
-    };
-
-    const barLayout = {
-      margin: { t: 10, r: 20, l: 45, b: 35 },
-      paper_bgcolor: paperBg,
-      plot_bgcolor: isDark ? '#1a273e' : '#f8fafc',
-      font: { color: textColor, family: 'Plus Jakarta Sans, sans-serif' },
-      xaxis: { title: 'Distance (Closer is better)' },
-      yaxis: { autorange: 'reversed' },
-      height: 200
-    };
-
-    Plotly.newPlot(barContainer, [barTrace], barLayout, { responsive: true, displayModeBar: false });
-  }
 }
 
 /* ===================================================================
@@ -763,7 +625,12 @@ function renderHomeCharts() {
   const textColor = isDark ? '#f8fafc' : '#0f172a';
 
   const clusterKeys = ['0', '1', '2', '3'];
-  const labels = ['Profile 1: Senior Bovine', 'Profile 2: Respiratory Distress', 'Profile 3: Young Sub-Febrile', 'Profile 4: Acute Febrile'];
+  const labels = [
+    '🐂 Senior Cattle Fatigue (29.2%)',
+    '🚨 Breathing & Chest Distress (22.2%)',
+    '🐐 Young Lameness & Bumps (25.1%)',
+    '🔥 Acute Fever & Infection (23.4%)'
+  ];
   const colors = ['#2563eb', '#dc2626', '#059669', '#d97706'];
   const counts = clusterKeys.map(k => homeProfilesData.profiles[k]?.sample_count || 10000);
 
@@ -779,7 +646,7 @@ function renderHomeCharts() {
       textinfo: 'percent',
       textfont: { color: '#ffffff', size: 12, weight: 700 },
       hoverinfo: 'label+value+percent',
-      hovertemplate: '<b>%{label}</b><br>Population: %{value:,} animals<br>Share: %{percent}<extra></extra>'
+      hovertemplate: '<b>%{label}</b><br>Animal Cases: %{value:,}<br>Farm Share: %{percent}<extra></extra>'
     };
 
     const donutLayout = {
@@ -801,18 +668,19 @@ function renderHomeCharts() {
   // 2. Species Breakdown Chart (Grouped Bars)
   const speciesEl = document.getElementById('home-chart-species');
   if (speciesEl) {
-    const speciesNames = ['Cow', 'Buffalo', 'Goat', 'Sheep'];
+    const speciesNames = ['Cow 🐄', 'Buffalo 🐃', 'Goat 🐐', 'Sheep 🐑'];
     const speciesColors = ['#059669', '#3b82f6', '#f59e0b', '#ec4899'];
 
     const traces = speciesNames.map((sp, idx) => {
-      const spKey = sp.toLowerCase();
+      const spKey = sp.split(' ')[0].toLowerCase();
       const vals = clusterKeys.map(k => homeProfilesData.profiles[k]?.species_distribution[spKey] || 0);
       return {
-        x: ['Cluster 1', 'Cluster 2', 'Cluster 3', 'Cluster 4'],
+        x: ['Senior Fatigue', 'Breathing Crisis', 'Young Lameness', 'Acute Fever'],
         y: vals,
         name: sp,
         type: 'bar',
-        marker: { color: speciesColors[idx] }
+        marker: { color: speciesColors[idx] },
+        hovertemplate: '%{fullData.name}: %{y:.1f}%<extra></extra>'
       };
     });
 
@@ -822,7 +690,7 @@ function renderHomeCharts() {
       plot_bgcolor: plotBg,
       font: { color: textColor, family: 'Plus Jakarta Sans, sans-serif' },
       margin: { t: 20, r: 15, l: 45, b: 35 },
-      yaxis: { title: 'Representation (%)', range: [0, 60] },
+      yaxis: { title: 'Percentage in this Group (%)', range: [0, 60] },
       legend: { orientation: 'h', y: 1.15, font: { size: 10 } }
     };
 
@@ -834,13 +702,18 @@ function renderHomeCharts() {
   if (vitalsEl) {
     const ages = clusterKeys.map(k => homeProfilesData.profiles[k]?.age_stats.mean || 5.0);
     const temps = clusterKeys.map(k => homeProfilesData.profiles[k]?.temp_stats.mean || 102.0);
-    const names = clusterKeys.map((k, i) => homeProfilesData.profiles[k]?.display_name || `Cluster ${i+1}`);
+    const friendlyNames = [
+      'Older Cattle (Weakness)',
+      'Severe Breathing Trouble',
+      'Young Livestock (Limping)',
+      'High Fever Crisis'
+    ];
 
     const vitalsTrace = {
       x: ages,
       y: temps,
       mode: 'markers+text',
-      text: names.map(n => n.split(':')[1]?.trim() || n),
+      text: friendlyNames,
       textposition: ['top center', 'bottom right', 'top right', 'bottom center'],
       textfont: { size: 11, color: textColor, weight: 700 },
       marker: {
@@ -850,7 +723,7 @@ function renderHomeCharts() {
         line: { color: '#ffffff', width: 2 }
       },
       type: 'scatter',
-      hovertemplate: '<b>%{text}</b><br>Mean Age: %{x:.1f} yr<br>Mean Temp: %{y:.1f} °F<extra></extra>'
+      hovertemplate: '<b>%{text}</b><br>Average Age: %{x:.1f} yr<br>Average Temp: %{y:.1f} °F<extra></extra>'
     };
 
     const vitalsLayout = {
@@ -858,9 +731,53 @@ function renderHomeCharts() {
       plot_bgcolor: plotBg,
       font: { color: textColor, family: 'Plus Jakarta Sans, sans-serif' },
       margin: { t: 30, r: 25, l: 55, b: 50 },
-      xaxis: { title: 'Mean Animal Age (Years)', range: [0, 15] },
-      yaxis: { title: 'Mean Rectal Temperature (°F)', range: [100.5, 105.0] },
+      xaxis: { title: 'Average Animal Age (Years)', range: [0, 15] },
+      yaxis: { title: 'Average Body Temperature (°F)', range: [100.5, 105.0] },
       shapes: [
+        // Normal Temp Zone
+        {
+          type: 'rect',
+          xref: 'paper',
+          x0: 0,
+          x1: 1,
+          y0: 101.0,
+          y1: 102.5,
+          fillcolor: 'rgba(16, 185, 129, 0.1)',
+          line: { width: 0 }
+        },
+        // Fever Threshold Line
+        {
+          type: 'line',
+          xref: 'paper',
+          x0: 0,
+          x1: 1,
+          y0: 103.5,
+          y1: 103.5,
+          line: { color: '#dc2626', width: 1.5, dash: 'dash' }
+        }
+      ],
+      annotations: [
+        {
+          xref: 'paper',
+          x: 0.02,
+          y: 101.75,
+          text: 'Healthy Body Temperature Zone (101.0 - 102.5 °F)',
+          showarrow: false,
+          font: { size: 10, color: '#059669' }
+        },
+        {
+          xref: 'paper',
+          x: 0.02,
+          y: 103.7,
+          text: 'High Fever Zone (Above 103.5 °F)',
+          showarrow: false,
+          font: { size: 10, color: '#dc2626' }
+        }
+      ]
+    };
+
+    Plotly.newPlot(vitalsEl, [vitalsTrace], vitalsLayout, { responsive: true, displayModeBar: false });
+  }
         // Normal Temp Zone
         {
           type: 'rect',

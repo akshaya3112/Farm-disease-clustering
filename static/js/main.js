@@ -12,6 +12,9 @@ document.addEventListener('DOMContentLoaded', () => {
   initThermometerSlider();
   
   // Page-specific initializers
+  if (document.getElementById('home-chart-distribution')) {
+    initHomeCharts();
+  }
   if (document.getElementById('plotly-elbow-chart')) {
     loadClusteringCharts();
   }
@@ -510,7 +513,7 @@ function renderPredictionResult(data) {
       </div>
 
       <!-- 2. Matched Herd Health Profile -->
-      <div style="background: var(--bg-surface-alt); padding: 1.25rem 1.5rem; border-radius: var(--radius-md); margin-bottom: 1.75rem; border: 1px solid var(--border-color);">
+      <div style="background: var(--bg-surface-alt); padding: 1.25rem 1.5rem; border-radius: var(--radius-md); margin-bottom: 1.5rem; border: 1px solid var(--border-color);">
         <div style="display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; gap: 0.75rem;">
           <div>
             <span class="badge badge-primary" style="margin-bottom: 0.35rem;">
@@ -528,6 +531,24 @@ function renderPredictionResult(data) {
             <strong style="font-size: 1.25rem; color: var(--primary);">${data.distance}</strong>
             <span style="font-size: 0.725rem; color: var(--text-muted); display: block;">(Distance)</span>
           </div>
+        </div>
+      </div>
+
+      <!-- 2.5 Live Visual Charts in Prediction Card (Speedometer & Centroid Fit) -->
+      <div class="grid-2" style="gap: 1.25rem; margin-bottom: 1.5rem;">
+        <div style="background: var(--bg-surface-alt); padding: 1rem; border-radius: var(--radius-md); border: 1px solid var(--border-color);">
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.25rem;">
+            <h4 style="font-size: 0.95rem; margin: 0;">Clinical Urgency Gauge</h4>
+            <span class="badge ${urgencyClass === 'critical' ? 'badge-danger' : (urgencyClass === 'priority' ? 'badge-warning' : 'badge-success')}">${data.urgency.level.split(' ')[0]}</span>
+          </div>
+          <div id="prediction-gauge-chart" style="width: 100%; height: 210px;"></div>
+        </div>
+        <div style="background: var(--bg-surface-alt); padding: 1rem; border-radius: var(--radius-md); border: 1px solid var(--border-color);">
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.25rem;">
+            <h4 style="font-size: 0.95rem; margin: 0;">Centroid Distance Proximity</h4>
+            <span class="badge badge-info">Lower = Better Fit</span>
+          </div>
+          <div id="prediction-bar-chart" style="width: 100%; height: 210px;"></div>
         </div>
       </div>
 
@@ -588,6 +609,105 @@ function renderPredictionResult(data) {
 
     </div>
   `;
+
+  // Render live gauge and bar charts inside prediction card
+  setTimeout(() => {
+    renderPredictionCharts(data);
+  }, 50);
+}
+
+/* ===================================================================
+   9.5 Render Live Prediction Charts (Gauge + Proximity Bar)
+   =================================================================== */
+function renderPredictionCharts(data) {
+  if (typeof Plotly === 'undefined') return;
+  const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
+  const paperBg = isDark ? '#121c2e' : '#ffffff';
+  const textColor = isDark ? '#f8fafc' : '#0f172a';
+
+  // 1. Gauge Speedometer
+  const gaugeContainer = document.getElementById('prediction-gauge-chart');
+  if (gaugeContainer) {
+    let score = 25;
+    let barColor = '#059669';
+    if (data.urgency.level.includes('CRITICAL')) {
+      score = 88;
+      barColor = '#dc2626';
+    } else if (data.urgency.level.includes('ELEVATED')) {
+      score = 58;
+      barColor = '#d97706';
+    }
+
+    const gaugeTrace = {
+      type: 'indicator',
+      mode: 'gauge+number',
+      value: score,
+      number: { suffix: '/100', font: { size: 22, color: barColor, family: 'Plus Jakarta Sans' } },
+      gauge: {
+        axis: { range: [0, 100], tickwidth: 1, tickcolor: textColor },
+        bar: { color: barColor, thickness: 0.3 },
+        bgcolor: isDark ? '#1a273e' : '#f1f5f9',
+        borderwidth: 0,
+        steps: [
+          { range: [0, 35], color: isDark ? 'rgba(5, 150, 105, 0.25)' : '#d1fae5' },
+          { range: [35, 70], color: isDark ? 'rgba(217, 119, 6, 0.25)' : '#fef3c7' },
+          { range: [70, 100], color: isDark ? 'rgba(220, 38, 38, 0.25)' : '#fee2e2' }
+        ],
+        threshold: {
+          line: { color: barColor, width: 4 },
+          thickness: 0.8,
+          value: score
+        }
+      }
+    };
+
+    const gaugeLayout = {
+      margin: { t: 25, r: 25, l: 25, b: 15 },
+      paper_bgcolor: paperBg,
+      font: { color: textColor, family: 'Plus Jakarta Sans, sans-serif' },
+      height: 200
+    };
+
+    Plotly.newPlot(gaugeContainer, [gaugeTrace], gaugeLayout, { responsive: true, displayModeBar: false });
+  }
+
+  // 2. Centroid Proximity Bar Chart
+  const barContainer = document.getElementById('prediction-bar-chart');
+  if (barContainer && data.all_distances) {
+    const clusterLabels = [];
+    const distances = [];
+    const barColors = [];
+
+    Object.entries(data.all_distances).forEach(([k, dist]) => {
+      clusterLabels.push(k.replace('Cluster ', 'C'));
+      distances.push(dist);
+      const isSelected = k.includes(`${data.cluster_id}`);
+      barColors.push(isSelected ? '#059669' : (isDark ? '#334155' : '#cbd5e1'));
+    });
+
+    const barTrace = {
+      x: distances,
+      y: clusterLabels,
+      type: 'bar',
+      orientation: 'h',
+      marker: { color: barColors },
+      text: distances.map(d => d.toFixed(2)),
+      textposition: 'inside',
+      insidetextfont: { color: '#ffffff', weight: 700 }
+    };
+
+    const barLayout = {
+      margin: { t: 10, r: 20, l: 45, b: 35 },
+      paper_bgcolor: paperBg,
+      plot_bgcolor: isDark ? '#1a273e' : '#f8fafc',
+      font: { color: textColor, family: 'Plus Jakarta Sans, sans-serif' },
+      xaxis: { title: 'Distance (Closer is better)' },
+      yaxis: { autorange: 'reversed' },
+      height: 200
+    };
+
+    Plotly.newPlot(barContainer, [barTrace], barLayout, { responsive: true, displayModeBar: false });
+  }
 }
 
 /* ===================================================================
@@ -600,13 +720,12 @@ function speakDiagnosis(encodedText) {
   }
   
   const text = decodeURIComponent(encodedText);
-  window.speechSynthesis.cancel(); // Stop any ongoing speech
+  window.speechSynthesis.cancel();
   
   const utterance = new SpeechSynthesisUtterance(text);
-  utterance.rate = 0.95; // Slightly slower, clear pace
+  utterance.rate = 0.95;
   utterance.pitch = 1.0;
   
-  // Try to find a natural English voice
   const voices = window.speechSynthesis.getVoices();
   const naturalVoice = voices.find(v => v.lang.startsWith('en') && (v.name.includes('Natural') || v.name.includes('Google') || v.name.includes('Samantha')));
   if (naturalVoice) utterance.voice = naturalVoice;
@@ -615,15 +734,192 @@ function speakDiagnosis(encodedText) {
 }
 
 /* ===================================================================
-   11. Clustering Charts (Plotly)
+   11. Home Dashboard Interactive Visual Discovery Charts
+   =================================================================== */
+let homeProfilesData = null;
+
+async function initHomeCharts() {
+  if (typeof Plotly === 'undefined') {
+    console.warn('Plotly not yet available, deferring home charts');
+    setTimeout(initHomeCharts, 200);
+    return;
+  }
+
+  try {
+    const res = await fetch('/api/profiles');
+    homeProfilesData = await res.json();
+    renderHomeCharts();
+    window.addEventListener('themeChanged', renderHomeCharts);
+  } catch (err) {
+    console.error('Failed to load home charts data:', err);
+  }
+}
+
+function renderHomeCharts() {
+  if (!homeProfilesData || !homeProfilesData.profiles) return;
+  const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
+  const paperBg = isDark ? '#121c2e' : '#ffffff';
+  const plotBg = isDark ? '#1a273e' : '#f8fafc';
+  const textColor = isDark ? '#f8fafc' : '#0f172a';
+
+  const clusterKeys = ['0', '1', '2', '3'];
+  const labels = ['Profile 1: Senior Bovine', 'Profile 2: Respiratory Distress', 'Profile 3: Young Sub-Febrile', 'Profile 4: Acute Febrile'];
+  const colors = ['#2563eb', '#dc2626', '#059669', '#d97706'];
+  const counts = clusterKeys.map(k => homeProfilesData.profiles[k]?.sample_count || 10000);
+
+  // 1. Donut Distribution Chart
+  const distEl = document.getElementById('home-chart-distribution');
+  if (distEl) {
+    const donutTrace = {
+      values: counts,
+      labels: labels,
+      type: 'pie',
+      hole: 0.55,
+      marker: { colors: colors },
+      textinfo: 'percent',
+      textfont: { color: '#ffffff', size: 12, weight: 700 },
+      hoverinfo: 'label+value+percent',
+      hovertemplate: '<b>%{label}</b><br>Population: %{value:,} animals<br>Share: %{percent}<extra></extra>'
+    };
+
+    const donutLayout = {
+      paper_bgcolor: paperBg,
+      font: { color: textColor, family: 'Plus Jakarta Sans, sans-serif' },
+      margin: { t: 15, r: 15, l: 15, b: 15 },
+      showlegend: true,
+      legend: { orientation: 'h', y: -0.15, font: { size: 10 } },
+      annotations: [{
+        text: '43,778<br><span style="font-size:10px;color:#94a3b8">ANIMALS</span>',
+        showarrow: false,
+        font: { size: 16, color: textColor, weight: 800 }
+      }]
+    };
+
+    Plotly.newPlot(distEl, [donutTrace], donutLayout, { responsive: true, displayModeBar: false });
+  }
+
+  // 2. Species Breakdown Chart (Grouped Bars)
+  const speciesEl = document.getElementById('home-chart-species');
+  if (speciesEl) {
+    const speciesNames = ['Cow', 'Buffalo', 'Goat', 'Sheep'];
+    const speciesColors = ['#059669', '#3b82f6', '#f59e0b', '#ec4899'];
+
+    const traces = speciesNames.map((sp, idx) => {
+      const spKey = sp.toLowerCase();
+      const vals = clusterKeys.map(k => homeProfilesData.profiles[k]?.species_distribution[spKey] || 0);
+      return {
+        x: ['Cluster 1', 'Cluster 2', 'Cluster 3', 'Cluster 4'],
+        y: vals,
+        name: sp,
+        type: 'bar',
+        marker: { color: speciesColors[idx] }
+      };
+    });
+
+    const speciesLayout = {
+      barmode: 'group',
+      paper_bgcolor: paperBg,
+      plot_bgcolor: plotBg,
+      font: { color: textColor, family: 'Plus Jakarta Sans, sans-serif' },
+      margin: { t: 20, r: 15, l: 45, b: 35 },
+      yaxis: { title: 'Representation (%)', range: [0, 60] },
+      legend: { orientation: 'h', y: 1.15, font: { size: 10 } }
+    };
+
+    Plotly.newPlot(speciesEl, traces, speciesLayout, { responsive: true, displayModeBar: false });
+  }
+
+  // 3. Vitals Risk Landscape (Age vs Temperature Centers with Error Bars)
+  const vitalsEl = document.getElementById('home-chart-vitals');
+  if (vitalsEl) {
+    const ages = clusterKeys.map(k => homeProfilesData.profiles[k]?.age_stats.mean || 5.0);
+    const temps = clusterKeys.map(k => homeProfilesData.profiles[k]?.temp_stats.mean || 102.0);
+    const names = clusterKeys.map((k, i) => homeProfilesData.profiles[k]?.display_name || `Cluster ${i+1}`);
+
+    const vitalsTrace = {
+      x: ages,
+      y: temps,
+      mode: 'markers+text',
+      text: names.map(n => n.split(':')[1]?.trim() || n),
+      textposition: ['top center', 'bottom right', 'top right', 'bottom center'],
+      textfont: { size: 11, color: textColor, weight: 700 },
+      marker: {
+        size: counts.map(c => Math.sqrt(c) * 0.42),
+        color: colors,
+        opacity: 0.85,
+        line: { color: '#ffffff', width: 2 }
+      },
+      type: 'scatter',
+      hovertemplate: '<b>%{text}</b><br>Mean Age: %{x:.1f} yr<br>Mean Temp: %{y:.1f} °F<extra></extra>'
+    };
+
+    const vitalsLayout = {
+      paper_bgcolor: paperBg,
+      plot_bgcolor: plotBg,
+      font: { color: textColor, family: 'Plus Jakarta Sans, sans-serif' },
+      margin: { t: 30, r: 25, l: 55, b: 50 },
+      xaxis: { title: 'Mean Animal Age (Years)', range: [0, 15] },
+      yaxis: { title: 'Mean Rectal Temperature (°F)', range: [100.5, 105.0] },
+      shapes: [
+        // Normal Temp Zone
+        {
+          type: 'rect',
+          xref: 'paper',
+          x0: 0,
+          x1: 1,
+          y0: 101.0,
+          y1: 102.5,
+          fillcolor: 'rgba(16, 185, 129, 0.1)',
+          line: { width: 0 }
+        },
+        // Fever Threshold Line
+        {
+          type: 'line',
+          xref: 'paper',
+          x0: 0,
+          x1: 1,
+          y0: 103.5,
+          y1: 103.5,
+          line: { color: '#dc2626', width: 1.5, dash: 'dash' }
+        }
+      ],
+      annotations: [
+        {
+          xref: 'paper',
+          x: 0.02,
+          y: 101.75,
+          text: 'Healthy Vital Range (101.0 - 102.5 °F)',
+          showarrow: false,
+          font: { size: 10, color: '#059669' }
+        },
+        {
+          xref: 'paper',
+          x: 0.02,
+          y: 103.7,
+          text: 'Fever Threshold (103.5 °F)',
+          showarrow: false,
+          font: { size: 10, color: '#dc2626' }
+        }
+      ]
+    };
+
+    Plotly.newPlot(vitalsEl, [vitalsTrace], vitalsLayout, { responsive: true, displayModeBar: false });
+  }
+}
+
+/* ===================================================================
+   12. Clustering Workflow Charts (Elbow, Silhouette, DBI, PCA)
    =================================================================== */
 let cachedMetrics = null;
 let cachedPca = null;
 
 async function loadClusteringCharts() {
-  const elbowContainer = document.getElementById('plotly-elbow-chart');
-  if (!elbowContainer) return;
-  
+  if (typeof Plotly === 'undefined') {
+    console.warn('Plotly not yet loaded, deferring clustering charts');
+    setTimeout(loadClusteringCharts, 200);
+    return;
+  }
+
   try {
     const [metricsRes, pcaRes] = await Promise.all([
       fetch('/api/metrics'),
@@ -636,6 +932,17 @@ async function loadClusteringCharts() {
     renderMetricCurves();
     renderPcaScatter();
     renderPcaScree();
+
+    // Wire up controls
+    const algoSelect = document.getElementById('metric-algo-select');
+    const kSelect = document.getElementById('metric-k-select');
+    const pcaKSelect = document.getElementById('pca-k-select');
+    const pcaDimSelect = document.getElementById('pca-dim-select');
+
+    if (algoSelect) algoSelect.addEventListener('change', renderMetricCurves);
+    if (kSelect) kSelect.addEventListener('change', renderMetricCurves);
+    if (pcaKSelect) pcaKSelect.addEventListener('change', renderPcaScatter);
+    if (pcaDimSelect) pcaDimSelect.addEventListener('change', renderPcaScatter);
     
     window.addEventListener('themeChanged', () => {
       renderMetricCurves();
@@ -649,121 +956,270 @@ async function loadClusteringCharts() {
 }
 
 function renderMetricCurves() {
-  if (!cachedMetrics) return;
-  const container = document.getElementById('plotly-elbow-chart');
-  if (!container) return;
-  
-  const metricType = document.getElementById('metric-selector')?.value || 'wcss';
-  const kVals = cachedMetrics.k_values;
-  const kmData = cachedMetrics.kmeans;
-  const kmedData = cachedMetrics.kmedians;
-  
-  let yKMeans = [];
-  let yKMedians = [];
-  let yTitle = '';
-  
-  if (metricType === 'wcss') {
-    yKMeans = kmData.wcss;
-    yKMedians = kmedData.total_l1_cost;
-    yTitle = 'Clustering Cost (WCSS / L1)';
-  } else if (metricType === 'silhouette') {
-    yKMeans = kmData.silhouette;
-    yKMedians = kmedData.silhouette;
-    yTitle = 'Silhouette Score (Higher is Better)';
-  } else if (metricType === 'dbi') {
-    yKMeans = kmData.davies_bouldin;
-    yKMedians = kmedData.davies_bouldin;
-    yTitle = 'Davies-Bouldin Index (Lower is Better)';
-  }
-  
-  const trace1 = {
-    x: kVals,
-    y: yKMeans,
-    mode: 'lines+markers',
-    name: 'Euclidean K-Means',
-    line: { color: '#059669', width: 3 },
-    marker: { size: 8 }
-  };
-  
-  const trace2 = {
-    x: kVals,
-    y: yKMedians,
-    mode: 'lines+markers',
-    name: 'Manhattan K-Medians',
-    line: { color: '#d97706', width: 3, dash: 'dot' },
-    marker: { size: 8 }
-  };
-  
+  if (!cachedMetrics || !cachedMetrics.records) return;
+
   const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
-  const layout = {
-    paper_bgcolor: isDark ? '#121c2e' : '#ffffff',
-    plot_bgcolor: isDark ? '#1a273e' : '#f8fafc',
-    font: { color: isDark ? '#f8fafc' : '#0f172a', family: 'Plus Jakarta Sans, sans-serif' },
+  const paperBg = isDark ? '#121c2e' : '#ffffff';
+  const plotBg = isDark ? '#1a273e' : '#f8fafc';
+  const textColor = isDark ? '#f8fafc' : '#0f172a';
+
+  const algoChoice = document.getElementById('metric-algo-select')?.value || 'all';
+  const highlightK = parseInt(document.getElementById('metric-k-select')?.value || '4');
+
+  // Filter records
+  const kmRecs = cachedMetrics.records.filter(r => r.algorithm === 'K-Means');
+  const kmedRecs = cachedMetrics.records.filter(r => r.algorithm === 'K-Medians');
+
+  const kVals = kmRecs.map(r => r.k);
+  const kmWcss = kmRecs.map(r => r.cost_wcss);
+  const kmedL1 = kmedRecs.map(r => r.cost_wcss);
+
+  const kmSil = kmRecs.map(r => r.silhouette);
+  const kmedSil = kmedRecs.map(r => r.silhouette);
+
+  const kmDbi = kmRecs.map(r => r.davies_bouldin);
+  const kmedDbi = kmedRecs.map(r => r.davies_bouldin);
+
+  // Common Layout Template
+  const baseLayout = (yTitle, extraShapes = []) => ({
+    paper_bgcolor: paperBg,
+    plot_bgcolor: plotBg,
+    font: { color: textColor, family: 'Plus Jakarta Sans, sans-serif' },
     xaxis: { title: 'Cluster Count (k)', tickmode: 'linear', dtick: 1 },
     yaxis: { title: yTitle },
-    margin: { t: 30, r: 20, l: 60, b: 50 },
-    legend: { orientation: 'h', y: 1.15 }
+    margin: { t: 30, r: 20, l: 55, b: 45 },
+    legend: { orientation: 'h', y: 1.15, font: { size: 10 } },
+    shapes: extraShapes
+  });
+
+  // Vertical highlight line at selected K
+  const highlightShape = {
+    type: 'line',
+    x0: highlightK,
+    x1: highlightK,
+    y0: 0,
+    y1: 1,
+    yref: 'paper',
+    line: { color: 'rgba(16, 185, 129, 0.4)', width: 2, dash: 'dot' }
   };
-  
-  Plotly.newPlot(container, [trace1, trace2], layout, { responsive: true, displayModeBar: false });
+
+  // 1. Elbow Chart (WCSS)
+  const elbowContainer = document.getElementById('plotly-elbow-chart');
+  if (elbowContainer) {
+    const traces = [];
+    if (algoChoice === 'all' || algoChoice === 'kmeans') {
+      traces.push({
+        x: kVals,
+        y: kmWcss,
+        name: 'K-Means (Euclidean WCSS)',
+        mode: 'lines+markers',
+        line: { color: '#059669', width: 3 },
+        marker: { size: 7, color: kVals.map(k => k === 4 ? '#f59e0b' : '#059669') }
+      });
+    }
+    if (algoChoice === 'all' || algoChoice === 'kmedians') {
+      traces.push({
+        x: kVals,
+        y: kmedL1,
+        name: 'K-Medians (Manhattan L1)',
+        mode: 'lines+markers',
+        line: { color: '#d97706', width: 3, dash: 'dot' },
+        marker: { size: 7 }
+      });
+    }
+
+    const layout = baseLayout('Within-Cluster Cost', [highlightShape]);
+    layout.annotations = [{
+      x: 4,
+      y: kmWcss[kVals.indexOf(4)],
+      text: '⭐ Elbow at k=4',
+      showarrow: true,
+      arrowhead: 2,
+      ax: 35,
+      ay: -25,
+      font: { size: 11, color: '#059669', weight: 700 }
+    }];
+
+    Plotly.newPlot(elbowContainer, traces, layout, { responsive: true, displayModeBar: false });
+  }
+
+  // 2. Silhouette Chart
+  const silContainer = document.getElementById('plotly-silhouette-chart');
+  if (silContainer) {
+    const traces = [];
+    if (algoChoice === 'all' || algoChoice === 'kmeans') {
+      traces.push({
+        x: kVals,
+        y: kmSil,
+        name: 'K-Means (Euclidean)',
+        mode: 'lines+markers',
+        line: { color: '#2563eb', width: 3 },
+        marker: { size: 7 }
+      });
+    }
+    if (algoChoice === 'all' || algoChoice === 'kmedians') {
+      traces.push({
+        x: kVals,
+        y: kmedSil,
+        name: 'K-Medians (Manhattan)',
+        mode: 'lines+markers',
+        line: { color: '#7c3aed', width: 3, dash: 'dot' },
+        marker: { size: 7 }
+      });
+    }
+
+    Plotly.newPlot(silContainer, traces, baseLayout('Silhouette Score (Higher = Better)', [highlightShape]), { responsive: true, displayModeBar: false });
+  }
+
+  // 3. Davies-Bouldin Index Chart
+  const dbiContainer = document.getElementById('plotly-dbi-chart');
+  if (dbiContainer) {
+    const traces = [];
+    if (algoChoice === 'all' || algoChoice === 'kmeans') {
+      traces.push({
+        x: kVals,
+        y: kmDbi,
+        name: 'K-Means (Euclidean)',
+        mode: 'lines+markers',
+        line: { color: '#059669', width: 3 },
+        marker: { size: 8, color: kVals.map(k => k === 4 ? '#dc2626' : '#059669') }
+      });
+    }
+    if (algoChoice === 'all' || algoChoice === 'kmedians') {
+      traces.push({
+        x: kVals,
+        y: kmedDbi,
+        name: 'K-Medians (Manhattan)',
+        mode: 'lines+markers',
+        line: { color: '#d97706', width: 3, dash: 'dot' },
+        marker: { size: 7 }
+      });
+    }
+
+    const dbiLayout = baseLayout('Davies-Bouldin Index (Lower = Better)', [highlightShape]);
+    dbiLayout.annotations = [{
+      x: 4,
+      y: 1.9161,
+      text: '🏆 Global Min (1.9161)',
+      showarrow: true,
+      arrowhead: 2,
+      ax: -40,
+      ay: -30,
+      font: { size: 11, color: '#dc2626', weight: 800 }
+    }];
+
+    Plotly.newPlot(dbiContainer, traces, dbiLayout, { responsive: true, displayModeBar: false });
+  }
 }
 
 function renderPcaScatter() {
-  if (!cachedPca) return;
+  if (!cachedPca || !cachedPca.sampled_points) return;
   const container = document.getElementById('plotly-pca-scatter');
   if (!container) return;
   
   const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
-  const colors = ['#2563eb', '#dc2626', '#059669', '#d97706'];
+  const paperBg = isDark ? '#121c2e' : '#ffffff';
+  const plotBg = isDark ? '#1a273e' : '#f8fafc';
+  const textColor = isDark ? '#f8fafc' : '#0f172a';
+
+  const selectedK = document.getElementById('pca-k-select')?.value || '4';
+  const dimChoice = document.getElementById('pca-dim-select')?.value || '2d';
+  const clusterKey = 'kmeans_k' + selectedK;
+
+  const colors = ['#2563eb', '#dc2626', '#059669', '#d97706', '#7c3aed', '#ec4899'];
   const clusterNames = [
     'Profile 1: Senior Bovine',
     'Profile 2: Respiratory Distress',
     'Profile 3: Young Sub-Febrile',
-    'Profile 4: Acute Febrile'
+    'Profile 4: Acute Febrile',
+    'Cluster 5',
+    'Cluster 6'
   ];
   
+  const numClusters = parseInt(selectedK);
   const traces = [];
-  for (let c = 0; c < 4; c++) {
-    const pts = cachedPca.sample_points.filter(p => p.cluster === c);
-    traces.push({
-      x: pts.map(p => p.pc1),
-      y: pts.map(p => p.pc2),
-      mode: 'markers',
-      name: clusterNames[c] || `Cluster ${c+1}`,
-      marker: { color: colors[c % colors.length], size: 5, opacity: 0.7 }
-    });
+
+  for (let c = 0; c < numClusters; c++) {
+    const pts = cachedPca.sampled_points.filter(p => p.clusters && p.clusters[clusterKey] === c);
+    
+    if (dimChoice === '3d') {
+      traces.push({
+        x: pts.map(p => p.pc1),
+        y: pts.map(p => p.pc2),
+        z: pts.map(p => p.pc3),
+        mode: 'markers',
+        type: 'scatter3d',
+        name: clusterNames[c] || `Cluster ${c+1}`,
+        marker: { color: colors[c % colors.length], size: 3, opacity: 0.75 }
+      });
+    } else {
+      traces.push({
+        x: pts.map(p => p.pc1),
+        y: pts.map(p => p.pc2),
+        mode: 'markers',
+        type: 'scatter',
+        name: clusterNames[c] || `Cluster ${c+1}`,
+        marker: { color: colors[c % colors.length], size: 5, opacity: 0.7 }
+      });
+    }
   }
-  
-  const layout = {
-    paper_bgcolor: isDark ? '#121c2e' : '#ffffff',
-    plot_bgcolor: isDark ? '#1a273e' : '#f8fafc',
-    font: { color: isDark ? '#f8fafc' : '#0f172a', family: 'Plus Jakarta Sans, sans-serif' },
-    xaxis: { title: `PC1 (${(cachedPca.explained_variance_ratio[0]*100).toFixed(1)}% Var - Age Axis)` },
-    yaxis: { title: `PC2 (${(cachedPca.explained_variance_ratio[1]*100).toFixed(1)}% Var - Temp Axis)` },
-    margin: { t: 30, r: 20, l: 50, b: 50 },
-    legend: { orientation: 'h', y: -0.2 }
-  };
+
+  const var1 = cachedPca.scree_data?.[0]?.pct_explained || 21.6;
+  const var2 = cachedPca.scree_data?.[1]?.pct_explained || 20.9;
+  const var3 = cachedPca.scree_data?.[2]?.pct_explained || 12.7;
+
+  let layout;
+  if (dimChoice === '3d') {
+    layout = {
+      paper_bgcolor: paperBg,
+      font: { color: textColor, family: 'Plus Jakarta Sans, sans-serif' },
+      margin: { t: 10, r: 10, l: 10, b: 10 },
+      scene: {
+        xaxis: { title: `PC1 (${var1}% Var)` },
+        yaxis: { title: `PC2 (${var2}% Var)` },
+        zaxis: { title: `PC3 (${var3}% Var)` },
+        bgcolor: plotBg
+      },
+      legend: { orientation: 'h', y: -0.1, font: { size: 10 } }
+    };
+  } else {
+    layout = {
+      paper_bgcolor: paperBg,
+      plot_bgcolor: plotBg,
+      font: { color: textColor, family: 'Plus Jakarta Sans, sans-serif' },
+      xaxis: { title: `PC1 (${var1}% Variance - Age Axis)` },
+      yaxis: { title: `PC2 (${var2}% Variance - Temp Axis)` },
+      margin: { t: 25, r: 20, l: 50, b: 45 },
+      legend: { orientation: 'h', y: -0.2, font: { size: 10 } }
+    };
+  }
   
   Plotly.newPlot(container, traces, layout, { responsive: true, displayModeBar: false });
 }
 
 function renderPcaScree() {
-  if (!cachedPca) return;
+  if (!cachedPca || !cachedPca.scree_data) return;
   const container = document.getElementById('plotly-pca-scree');
   if (!container) return;
   
   const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
-  const nComps = cachedPca.explained_variance_ratio.length;
-  const labels = Array.from({ length: nComps }, (_, i) => `PC${i+1}`);
-  const individual = cachedPca.explained_variance_ratio.map(v => v * 100);
-  const cumulative = cachedPca.cumulative_variance_ratio.map(v => v * 100);
+  const paperBg = isDark ? '#121c2e' : '#ffffff';
+  const plotBg = isDark ? '#1a273e' : '#f8fafc';
+  const textColor = isDark ? '#f8fafc' : '#0f172a';
+
+  // Display top 10 PCs for readability
+  const topScree = cachedPca.scree_data.slice(0, 10);
+  const labels = topScree.map(s => `PC${s.component}`);
+  const individual = topScree.map(s => s.pct_explained);
+  const cumulative = topScree.map(s => s.pct_cumulative);
   
   const trace1 = {
     x: labels,
     y: individual,
     type: 'bar',
     name: 'Individual Variance %',
-    marker: { color: '#059669' }
+    marker: { color: '#059669' },
+    hovertemplate: '%{x}: %{y:.1f}% explained<extra></extra>'
   };
   
   const trace2 = {
@@ -772,30 +1228,36 @@ function renderPcaScree() {
     type: 'scatter',
     mode: 'lines+markers',
     name: 'Cumulative %',
-    line: { color: '#d97706', width: 2 }
+    line: { color: '#d97706', width: 2.5 },
+    marker: { size: 6 },
+    hovertemplate: 'Cumulative: %{y:.1f}%<extra></extra>'
   };
   
   const layout = {
-    paper_bgcolor: isDark ? '#121c2e' : '#ffffff',
-    plot_bgcolor: isDark ? '#1a273e' : '#f8fafc',
-    font: { color: isDark ? '#f8fafc' : '#0f172a', family: 'Plus Jakarta Sans, sans-serif' },
-    xaxis: { title: 'Principal Components' },
+    paper_bgcolor: paperBg,
+    plot_bgcolor: plotBg,
+    font: { color: textColor, family: 'Plus Jakarta Sans, sans-serif' },
+    xaxis: { title: 'Principal Components (Top 10 of 30)' },
     yaxis: { title: 'Variance Explained (%)', range: [0, 105] },
-    margin: { t: 30, r: 20, l: 50, b: 50 },
-    legend: { orientation: 'h', y: 1.15 }
+    margin: { t: 25, r: 20, l: 50, b: 45 },
+    legend: { orientation: 'h', y: 1.15, font: { size: 10 } }
   };
   
   Plotly.newPlot(container, [trace1, trace2], layout, { responsive: true, displayModeBar: false });
 }
 
 /* ===================================================================
-   12. Profile Pairwise Comparison Tool
+   13. Profile Pairwise Comparison Tool
    =================================================================== */
 let cachedProfiles = null;
 
 async function loadProfileComparisonTool() {
   const compContainer = document.getElementById('plotly-cluster-compare');
   if (!compContainer) return;
+  if (typeof Plotly === 'undefined') {
+    setTimeout(loadProfileComparisonTool, 200);
+    return;
+  }
   
   try {
     const res = await fetch('/api/profiles');
@@ -815,7 +1277,7 @@ async function loadProfileComparisonTool() {
 }
 
 function renderClusterComparison() {
-  if (!cachedProfiles) return;
+  if (!cachedProfiles || !cachedProfiles.profiles) return;
   const container = document.getElementById('plotly-cluster-compare');
   if (!container) return;
   
@@ -826,31 +1288,48 @@ function renderClusterComparison() {
   const profB = cachedProfiles.profiles[selB];
   if (!profA || !profB) return;
   
-  const sympMapA = {};
-  profA.top_symptoms.forEach(s => sympMapA[s.symptom] = s.prevalence_pct);
-  const sympMapB = {};
-  profB.top_symptoms.forEach(s => sympMapB[s.symptom] = s.prevalence_pct);
+  const sympMapA = profA.all_symptom_prevalence || {};
+  const sympMapB = profB.all_symptom_prevalence || {};
   
-  const allSymps = Array.from(new Set([...Object.keys(sympMapA), ...Object.keys(sympMapB)])).slice(0, 10);
-  const diffs = allSymps.map(s => (sympMapA[s] || 0) - (sympMapB[s] || 0));
+  // Also fallback to top_symptoms if all_symptom_prevalence is missing
+  if (Object.keys(sympMapA).length === 0 && profA.top_symptoms) {
+    profA.top_symptoms.forEach(s => sympMapA[s.symptom] = s.prevalence_pct);
+  }
+  if (Object.keys(sympMapB).length === 0 && profB.top_symptoms) {
+    profB.top_symptoms.forEach(s => sympMapB[s.symptom] = s.prevalence_pct);
+  }
+
+  const allSympKeys = Array.from(new Set([...Object.keys(sympMapA), ...Object.keys(sympMapB)]));
+  
+  // Calculate differences and sort by magnitude
+  const diffList = allSympKeys.map(s => ({
+    symptom: s,
+    diff: (sympMapA[s] || 0) - (sympMapB[s] || 0)
+  })).sort((a, b) => Math.abs(b.diff) - Math.abs(a.diff)).slice(0, 12);
   
   const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
+  const paperBg = isDark ? '#121c2e' : '#ffffff';
+  const plotBg = isDark ? '#1a273e' : '#f8fafc';
+  const textColor = isDark ? '#f8fafc' : '#0f172a';
+
   const trace = {
-    x: diffs,
-    y: allSymps,
+    x: diffList.map(d => d.diff),
+    y: diffList.map(d => d.symptom.charAt(0).toUpperCase() + d.symptom.slice(1)),
     type: 'bar',
     orientation: 'h',
     marker: {
-      color: diffs.map(d => d >= 0 ? '#059669' : '#dc2626')
-    }
+      color: diffList.map(d => d.diff >= 0 ? '#059669' : '#dc2626')
+    },
+    hovertemplate: '%{y}: %{x:+.1f}%<extra></extra>'
   };
   
   const layout = {
-    paper_bgcolor: isDark ? '#121c2e' : '#ffffff',
-    plot_bgcolor: isDark ? '#1a273e' : '#f8fafc',
-    font: { color: isDark ? '#f8fafc' : '#0f172a', family: 'Plus Jakarta Sans, sans-serif' },
-    xaxis: { title: `Prevalence Difference (%): Elevated in ${profA.display_name} (+) vs ${profB.display_name} (-)` },
-    margin: { t: 30, r: 20, l: 160, b: 50 }
+    paper_bgcolor: paperBg,
+    plot_bgcolor: plotBg,
+    font: { color: textColor, family: 'Plus Jakarta Sans, sans-serif' },
+    xaxis: { title: `Prevalence Difference (%): Elevated in ${profA.display_name.split(':')[0]} (+) vs ${profB.display_name.split(':')[0]} (-)` },
+    yaxis: { autorange: 'reversed' },
+    margin: { t: 25, r: 20, l: 150, b: 45 }
   };
   
   Plotly.newPlot(container, [trace], layout, { responsive: true, displayModeBar: false });

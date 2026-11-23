@@ -325,6 +325,60 @@
 </div>
 
 <!-- =============================================================
+     1.5. Interactive Visual Discovery Dashboard (Live Plotly)
+     ============================================================= -->
+<div class="card" style="border-left: 5px solid var(--primary); margin-bottom: 2.75rem;">
+  <div class="card-title">
+    <div>
+      <span class="badge badge-primary" style="margin-bottom: 0.35rem;">📊 Interactive Visual Analytics</span>
+      <h3 style="margin-bottom: 0;">Live Herd Population Health Dashboard</h3>
+    </div>
+    <span class="badge badge-success">43,778 Audited Livestock Records</span>
+  </div>
+  <p style="font-size: 0.925rem; color: var(--text-secondary); margin-bottom: 1.5rem;">
+    Explore herd distribution, species vulnerability, and vital risk clustering across the entire dataset. Hover over slices and bars for live clinical insights:
+  </p>
+  
+  <div class="grid-2" style="gap: 1.5rem; margin-bottom: 1.5rem;">
+    <!-- Chart 1: Donut Distribution -->
+    <div style="background: var(--bg-surface-alt); padding: 1.25rem; border-radius: var(--radius-md); border: 1px solid var(--border-color);">
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem;">
+        <h4 style="margin: 0; font-size: 1rem; color: var(--text-primary);">Herd Distribution by Health Profile</h4>
+        <span class="badge badge-info">Interactive Donut</span>
+      </div>
+      <div id="home-chart-distribution" style="width: 100%; height: 320px;"></div>
+      <p style="font-size: 0.8rem; color: var(--text-muted); text-align: center; margin-top: 0.5rem; margin-bottom: 0;">
+        4 discovered complexes (Geriatric, Hyperthermic, Young Lameness, Acute Fever).
+      </p>
+    </div>
+    
+    <!-- Chart 2: Species Vulnerability -->
+    <div style="background: var(--bg-surface-alt); padding: 1.25rem; border-radius: var(--radius-md); border: 1px solid var(--border-color);">
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem;">
+        <h4 style="margin: 0; font-size: 1rem; color: var(--text-primary);">Species Vulnerability Breakdown</h4>
+        <span class="badge badge-info">Grouped Proportions</span>
+      </div>
+      <div id="home-chart-species" style="width: 100%; height: 320px;"></div>
+      <p style="font-size: 0.8rem; color: var(--text-muted); text-align: center; margin-top: 0.5rem; margin-bottom: 0;">
+        Comparing Cow 🐄, Buffalo 🐃, Goat 🐐, and Sheep 🐑 proportions across groups.
+      </p>
+    </div>
+  </div>
+
+  <!-- Chart 3: Temperature vs Age Clinical Landscape -->
+  <div style="background: var(--bg-surface-alt); padding: 1.25rem; border-radius: var(--radius-md); border: 1px solid var(--border-color);">
+    <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 0.5rem; margin-bottom: 0.5rem;">
+      <h4 style="margin: 0; font-size: 1rem; color: var(--text-primary);">Clinical Vital Landscape (Temperature &deg;F vs Age)</h4>
+      <span class="badge badge-warning">Sampled Herd Centers &bull; Hover for Details</span>
+    </div>
+    <div id="home-chart-vitals" style="width: 100%; height: 360px;"></div>
+    <p style="font-size: 0.8rem; color: var(--text-muted); text-align: center; margin-top: 0.5rem; margin-bottom: 0;">
+      Shows how unsupervised learning cleanly separates elderly depressive animals from young acute fever cases.
+    </p>
+  </div>
+</div>
+
+<!-- =============================================================
      2. Key Empirical Findings Grid (Real Pipeline Data)
      ============================================================= -->
 <h2 style="margin-bottom: 1rem;">Key Empirical Pipeline Findings</h2>

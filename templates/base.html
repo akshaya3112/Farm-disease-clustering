@@ -6,8 +6,13 @@
   <title>{% block title %}Farm Disease-Risk Profile Discovery{% endblock %} | Livestock AI Assistant</title>
   <meta name="description" content="AI-assisted veterinary triage and unsupervised disease-risk profile discovery for livestock (cow, buffalo, goat, sheep).">
   <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}?v=3">
-  <!-- Plotly.js for responsive interactive clinical charts -->
-  <script src="https://cdn.plot.ly/plotly-2.35.2.min.js" charset="utf-8"></script>
+  <!-- Plotly.js for responsive interactive clinical charts (Local first, CDN fallback) -->
+  <script src="{{ url_for('static', filename='js/plotly.min.js') }}"></script>
+  <script>
+    if (typeof Plotly === 'undefined') {
+      document.write('<script src="https://cdn.plot.ly/plotly-2.35.2.min.js" charset="utf-8"><\/script>');
+    }
+  </script>
 </head>
 <body class="farmer-view-active">
 

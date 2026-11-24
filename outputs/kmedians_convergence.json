@@ -1,0 +1,182 @@
+{
+  "2": {
+    "iters": [
+      3,
+      5,
+      4,
+      4,
+      4
+    ],
+    "conv": [
+      true,
+      true,
+      true,
+      true,
+      true
+    ],
+    "best_iters": 5,
+    "best_conv": true,
+    "dbi_eu": 2.704260628989322,
+    "dbi_l1": 2.6751500375476835
+  },
+  "3": {
+    "iters": [
+      4,
+      4,
+      6,
+      4,
+      4
+    ],
+    "conv": [
+      true,
+      true,
+      true,
+      true,
+      true
+    ],
+    "best_iters": 4,
+    "best_conv": true,
+    "dbi_eu": 2.927496824050024,
+    "dbi_l1": 3.0633964501725006
+  },
+  "4": {
+    "iters": [
+      4,
+      4,
+      4,
+      6,
+      4
+    ],
+    "conv": [
+      true,
+      true,
+      true,
+      true,
+      true
+    ],
+    "best_iters": 6,
+    "best_conv": true,
+    "dbi_eu": 2.607994921242377,
+    "dbi_l1": 2.9183525247758952
+  },
+  "5": {
+    "iters": [
+      4,
+      6,
+      5,
+      7,
+      7
+    ],
+    "conv": [
+      true,
+      true,
+      true,
+      true,
+      true
+    ],
+    "best_iters": 6,
+    "best_conv": true,
+    "dbi_eu": 2.675475231904092,
+    "dbi_l1": 3.3301200623636107
+  },
+  "6": {
+    "iters": [
+      7,
+      5,
+      8,
+      9,
+      4
+    ],
+    "conv": [
+      true,
+      true,
+      true,
+      true,
+      true
+    ],
+    "best_iters": 8,
+    "best_conv": true,
+    "dbi_eu": 3.309799171680929,
+    "dbi_l1": 2.453660787032103
+  },
+  "7": {
+    "iters": [
+      13,
+      7,
+      9,
+      11,
+      5
+    ],
+    "conv": [
+      true,
+      true,
+      true,
+      true,
+      true
+    ],
+    "best_iters": 11,
+    "best_conv": true,
+    "dbi_eu": 2.3551787029210027,
+    "dbi_l1": 2.2866962290172332
+  },
+  "8": {
+    "iters": [
+      8,
+      8,
+      7,
+      9,
+      7
+    ],
+    "conv": [
+      true,
+      true,
+      true,
+      true,
+      true
+    ],
+    "best_iters": 8,
+    "best_conv": true,
+    "dbi_eu": 2.4446417328380634,
+    "dbi_l1": 1.9177115125623931
+  },
+  "9": {
+    "iters": [
+      11,
+      6,
+      7,
+      7,
+      7
+    ],
+    "conv": [
+      true,
+      true,
+      true,
+      true,
+      true
+    ],
+    "best_iters": 7,
+    "best_conv": true,
+    "dbi_eu": 2.775613200253799,
+    "dbi_l1": 1.9198313987641893
+  },
+  "10": {
+    "iters": [
+      8,
+      10,
+      8,
+      8,
+      7
+    ],
+    "conv": [
+      true,
+      true,
+      true,
+      true,
+      true
+    ],
+    "best_iters": 7,
+    "best_conv": true,
+    "dbi_eu": 2.7918005503471006,
+    "dbi_l1": 2.130112853118707
+  }
+}

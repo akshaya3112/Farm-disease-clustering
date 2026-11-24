@@ -517,3 +517,11 @@
 </div>
 
 {% endblock %}
+
+{% block scripts %}
+<script>
+  // Inline chart data - no async fetch needed, renders immediately
+  window.FARM_PROFILES_DATA = {{ profiles | tojson | safe if profiles else 'null' }};
+  window.FARM_METRICS_DATA  = {{ metrics  | tojson | safe if metrics  else 'null' }};
+</script>
+{% endblock %}

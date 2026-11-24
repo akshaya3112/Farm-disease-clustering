@@ -11,15 +11,28 @@ document.addEventListener('DOMContentLoaded', () => {
   initTableSearch();
   initThermometerSlider();
   
-  // Page-specific initializers
+  // Page-specific initializers - defer Plotly-dependent charts to window.load
+  // so that plotly.min.js (4.8MB) has fully executed before we draw
   if (document.getElementById('home-chart-distribution')) {
-    initHomeCharts();
+    if (document.readyState === 'complete') {
+      initHomeCharts();
+    } else {
+      window.addEventListener('load', initHomeCharts);
+    }
   }
   if (document.getElementById('plotly-elbow-chart')) {
-    loadClusteringCharts();
+    if (document.readyState === 'complete') {
+      loadClusteringCharts();
+    } else {
+      window.addEventListener('load', loadClusteringCharts);
+    }
   }
   if (document.getElementById('plotly-cluster-compare')) {
-    loadProfileComparisonTool();
+    if (document.readyState === 'complete') {
+      loadProfileComparisonTool();
+    } else {
+      window.addEventListener('load', loadProfileComparisonTool);
+    }
   }
 });
 
@@ -600,25 +613,39 @@ function speakDiagnosis(encodedText) {
    =================================================================== */
 let homeProfilesData = null;
 
-async function initHomeCharts() {
+function initHomeCharts() {
+  // Use inline data injected by Flask (fast, no fetch needed)
+  if (window.FARM_PROFILES_DATA) {
+    homeProfilesData = window.FARM_PROFILES_DATA;
+    renderHomeCharts();
+    window.addEventListener('themeChanged', renderHomeCharts);
+    return;
+  }
+
+  // Fallback: fetch from API
   if (typeof Plotly === 'undefined') {
     console.warn('Plotly not yet available, deferring home charts');
     setTimeout(initHomeCharts, 200);
     return;
   }
 
-  try {
-    const res = await fetch('/api/profiles');
-    homeProfilesData = await res.json();
-    renderHomeCharts();
-    window.addEventListener('themeChanged', renderHomeCharts);
-  } catch (err) {
-    console.error('Failed to load home charts data:', err);
-  }
+  fetch('/api/profiles')
+    .then(r => r.json())
+    .then(data => {
+      homeProfilesData = data;
+      renderHomeCharts();
+      window.addEventListener('themeChanged', renderHomeCharts);
+    })
+    .catch(err => console.error('Failed to load home charts data:', err));
 }
 
 function renderHomeCharts() {
   if (!homeProfilesData || !homeProfilesData.profiles) return;
+  if (typeof Plotly === 'undefined') {
+    // Plotly not ready yet - retry in 300ms
+    setTimeout(renderHomeCharts, 300);
+    return;
+  }
   const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
   const paperBg = isDark ? '#121c2e' : '#ffffff';
   const plotBg = isDark ? '#1a273e' : '#f8fafc';
@@ -778,50 +805,14 @@ function renderHomeCharts() {
 
     Plotly.newPlot(vitalsEl, [vitalsTrace], vitalsLayout, { responsive: true, displayModeBar: false });
   }
-        // Normal Temp Zone
-        {
-          type: 'rect',
-          xref: 'paper',
-          x0: 0,
-          x1: 1,
-          y0: 101.0,
-          y1: 102.5,
-          fillcolor: 'rgba(16, 185, 129, 0.1)',
-          line: { width: 0 }
-        },
-        // Fever Threshold Line
-        {
-          type: 'line',
-          xref: 'paper',
-          x0: 0,
-          x1: 1,
-          y0: 103.5,
-          y1: 103.5,
-          line: { color: '#dc2626', width: 1.5, dash: 'dash' }
-        }
-      ],
-      annotations: [
-        {
-          xref: 'paper',
-          x: 0.02,
-          y: 101.75,
-          text: 'Healthy Vital Range (101.0 - 102.5 °F)',
-          showarrow: false,
-          font: { size: 10, color: '#059669' }
-        },
-        {
-          xref: 'paper',
-          x: 0.02,
-          y: 103.7,
-          text: 'Fever Threshold (103.5 °F)',
-          showarrow: false,
-          font: { size: 10, color: '#dc2626' }
-        }
-      ]
-    };
 
-    Plotly.newPlot(vitalsEl, [vitalsTrace], vitalsLayout, { responsive: true, displayModeBar: false });
-  }
+  // Force Plotly to re-compute layout after the page has fully painted
+  setTimeout(() => {
+    ['home-chart-distribution', 'home-chart-species', 'home-chart-vitals'].forEach(id => {
+      const el = document.getElementById(id);
+      if (el && el.data) Plotly.relayout(el, { autosize: true });
+    });
+  }, 100);
 }
 
 /* ===================================================================
